@@ -2,4 +2,6 @@
 *.o
 **/Debug/
 **/Release/
+**/.settings/
+RemoteSystemTempFiles
 .metadata
