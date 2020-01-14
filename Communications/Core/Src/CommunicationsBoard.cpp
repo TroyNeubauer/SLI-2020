@@ -1,17 +1,12 @@
 
 #include "CommunicationsBoard.h"
 
-void CommunicationsBoard::Init()
+CommunicationsBoard::CommunicationsBoard()
 {
 
 }
 
 void CommunicationsBoard::Loop()
-{
-
-}
-
-void CommunicationsBoard::Shutdown()
 {
 
 }

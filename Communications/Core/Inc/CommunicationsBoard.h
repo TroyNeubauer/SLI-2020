@@ -1,10 +1,11 @@
 #pragma once
 
+#include "Board.h"
 
-class CommunicationsBoard
+class CommunicationsBoard : public Board
 {
-	void Init();
-	void Loop();
-	void Shutdown();
+public:
+	CommunicationsBoard();
+	virtual void Loop();
 };
 
