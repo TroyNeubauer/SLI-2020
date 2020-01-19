@@ -14,37 +14,40 @@ enum class ModuleID
 	MAX_MODULE_ID = 16,
 };
 
-using PacketType = uint8_t;
+using PacketTypeValue = uint8_t;
 
-//Indicates that a certain module has initialized
-//Only sent once
-//This is the first packet that will be sent for a device
-constexpr PacketType INIT = 0;
+namespace PacketType {
+	//Indicates that a certain module has initialized
+	//Only sent once
+	//This is the first packet that will be sent for a device
+	constexpr PacketTypeValue INIT = 0;
 
-//The module has entered a different status (GPS lock, accelerometer mode set, etc.)
-constexpr PacketType STATUS = 1;
+	//The module has entered a different status (GPS lock, accelerometer mode set, etc.)
+	constexpr PacketTypeValue STATUS = 1;
 
-//This module is sending new data (altitude reading, velocity, etc.)
-constexpr PacketType DATA = 2;
+	//This module is sending new data (altitude reading, velocity, etc.)
+	constexpr PacketTypeValue DATA = 2;
 
-//Some type of error has occurred
-constexpr PacketType ERROR = 3;
+	//Some type of error has occurred
+	constexpr PacketTypeValue ERROR = 3;
 
-//A device is asking another device for something
-constexpr PacketType REQUEST = 4;
+	//A device is asking another device for something
+	constexpr PacketTypeValue REQUEST = 4;
 
-//A device is asking another device for something
-constexpr PacketType RESPONSE = 5;
+	//A device is asking another device for something
+	constexpr PacketTypeValue RESPONSE = 5;
 
-//Used to identify
-constexpr PacketType MAX_PACKET_TYPE = 6;
+	//Used to identify
+	constexpr PacketTypeValue MAX_PACKET_TYPE = 6;
+}
 
+using RequestTypeValue = uint8_t;
 
-using RequestType = uint8_t;
+namespace RequestType {
 
-constexpr RequestType NONE = 0;
-constexpr RequestType WAKE = 1;
-
+	constexpr RequestTypeValue NONE = 0;
+	constexpr RequestTypeValue WAKE = 1;
+}
 
 struct PacketHeader
 {
@@ -56,7 +59,7 @@ struct PacketHeader
 	ModuleID Forwarder;
 
 	ModuleID From;
-	PacketType Type;
+	PacketTypeValue Type;
 
 };
 
@@ -67,16 +70,19 @@ class SLICoreModule;
 class SLIModule
 {
 public:
-	SLIModule(SLICoreModule* core) : m_CoreModule(core) {}
+	SLIModule(SLICoreModule* core, ModuleID moduleID) : m_CoreModule(core), m_ModuleID(moduleID) {}
 
 	virtual void Init() = 0;
 	virtual void Update() = 0;
-	virtual void SendPacket(const PacketHeader& header, const Buffer& packet);
+	virtual void SendPacket(const PacketHeader& header, Buffer& packet);
 	virtual void RecievePacket(const PacketHeader& header, Buffer& packet) = 0;
-	virtual ModuleID GetID() = 0;
+	inline ModuleID GetID() const { return m_ModuleID; }
+
+	virtual ~SLIModule() {}
 
 private:
 	SLICoreModule* m_CoreModule;
+	ModuleID m_ModuleID;
 };
 
 
@@ -89,25 +95,37 @@ public:
 	virtual void Update() = 0;
 
 	//Called by modules to send packets
-	virtual void SendPacket(const PacketHeader& header, const Buffer& packet);
+	virtual void SendPacket(const PacketHeader& header, Buffer& packet);
+
+	//Called by the user in Update
+	//Manages calling RecievePacket on the local module or RoutePacket
+	//to get the packet to its final destination
 	virtual void RecievePacket(const PacketHeader& header, Buffer& packet);
 
-	//Returns true if modules can be
+	//Returns true if modules is directly connected to this device
 	bool HasModule(ModuleID id);
+
+	virtual ~SLICoreModule() {}
+
+protected:
+	void UpdateLocalModules();
 
 private:
 	//Re-sends a packet across the wire/radio to the intended recipient
-	void RoutePacket(const PacketHeader& header, const Buffer& packet) = 0;
+	virtual void RoutePacket(const PacketHeader& header, Buffer& packet) = 0;
 
-private:
 	//Delivers a packet to its local destination
-	void DeliverPacket(const PacketHeader& header, const Buffer& packet);
+	void DeliverLocalPacket(const PacketHeader& header, Buffer& packet);
 
 
 protected:
 	//Either a pointer to the module if is packets can be sent directly to it
 	//Or nullptr if a packet being sent there needs routing
-	std::array<SLIModule*, (int) ModuleID::MAX_MODULE_ID> m_ContainedModules;
+	std::array<SLIModule*, static_cast<int>(ModuleID::MAX_MODULE_ID)> m_ContainedModules;
 };
+
+class Buffer;
+
+uint16_t SizeOfPacket(const PacketHeader& header, Buffer& buffer);
 
 

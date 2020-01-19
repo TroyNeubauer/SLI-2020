@@ -1,12 +1,18 @@
 #include "SensorsBoard.h"
 
-SensorsBoard::SensorsBoard()
+
+void SensorsBoard::Init()
+{
+
+}
+
+void SensorsBoard::Update()
 {
 
 }
 
 
-void SensorsBoard::Loop()
+void SensorsBoard::RoutePacket(const PacketHeader& header, Buffer& packet)
 {
 
 }

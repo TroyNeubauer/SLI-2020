@@ -9,7 +9,7 @@ class Buffer
 {
 public:
 	Buffer(uint8_t* buf, uint32_t offset, uint32_t capacity)
-		: m_Offset(offset), m_Buf(buf), m_Capacity(capacity) {}
+		: m_Buf(buf), m_Offset(offset), m_Capacity(capacity) {}
 
 	template<typename T>
 	void Read(T& value)
@@ -20,9 +20,9 @@ public:
 	}
 
 private:
+	uint8_t* m_Buf;
 	uint32_t m_Offset;
 	uint32_t m_Capacity;
-	uint8_t* m_Buf;
 
 };
 

@@ -1,11 +1,17 @@
 #pragma once
 
-#include "Board.h"
+#include "Module.h"
 
-class SensorsBoard : public Board
+class SensorsBoard : public SLICoreModule
 {
-	SensorsBoard();
-	virtual void Loop();
+public:
+	SensorsBoard() {}
+
+	virtual void Init();
+	virtual void Update();
+
+private:
+	virtual void RoutePacket(const PacketHeader& header, Buffer& packet);
 
 
 };
