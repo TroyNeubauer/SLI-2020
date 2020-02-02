@@ -4,7 +4,6 @@
 
 #include "stm32f1xx_hal.h"
 
-
 class CommunicationsBoard : public SLICoreModule
 {
 public:
