@@ -8,7 +8,7 @@ class CommunicationsBoard : public SLICoreModule
 {
 public:
 	CommunicationsBoard(SPI_HandleTypeDef* spi, UART_HandleTypeDef* uart1, UART_HandleTypeDef* uart2)
-		: SPI(spi), UART1(uart1), UART2(uart2) {}
+		: SLICoreModule(ModuleID::STM32F103), SPI(spi), UART1(uart1), UART2(uart2) {}
 
 	virtual void Init();
 	virtual void Update();

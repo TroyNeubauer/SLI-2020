@@ -170,7 +170,7 @@ private:
 	char m_Buf[Cap];
 	Formatter m_Wrapper;
 };
-API
+
 using DefaultFormatter = SizedFormatter<256>;
 
 // Commented on 2/3/2020 because files don't exist in the STM32 C standard library

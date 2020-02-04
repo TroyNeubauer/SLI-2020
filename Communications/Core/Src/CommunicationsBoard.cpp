@@ -2,6 +2,12 @@
 
 #include "stm32f1xx_hal_uart.h"
 
+void SerialPrint(const char* message)
+{
+	//TODO
+}
+
+
 void CommunicationsBoard::Init()
 {
 

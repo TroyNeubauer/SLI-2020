@@ -67,6 +67,12 @@ struct PacketHeader
 
 class SLICoreModule;
 
+void LogInfo(ModuleID module, const char* message);
+void LogWarn(ModuleID module, const char* message);
+void LogError(ModuleID module, const char* message);
+
+void SerialPrint(const char* message);
+
 //An SLI module represents a sensor or processor that can send and receive packets
 //Eg. the radio, GPS, altimeter, etc
 class SLIModule
@@ -80,7 +86,15 @@ public:
 	virtual void RecievePacket(const PacketHeader& header, Buffer& packet) = 0;
 	inline ModuleID GetID() const { return m_ModuleID; }
 
+
 	virtual ~SLIModule() {}
+
+
+protected:
+	inline void Info(const char* message)  const { LogInfo(GetID(), message); }
+	inline void Warn(const char* message)  const { LogInfo(GetID(), message); }
+	inline void Error(const char* message) const { LogInfo(GetID(), message); }
+
 
 private:
 	SLICoreModule* m_CoreModule;
@@ -88,29 +102,37 @@ private:
 };
 
 
+
 //A core module represents a module that can physically send and receive packets
 //Eg. the ground station, the STM32F103, and the STM32F205
 class SLICoreModule
 {
 public:
-	virtual void Init() = 0;
+	SLICoreModule(ModuleID self) : m_ModuleID(self) {}
+
 	virtual void Update() = 0;
 
 	//Called by modules to send packets
 	virtual void SendPacket(const PacketHeader& header, Buffer& packet);
 
-	//Called by the user in Update
+	//Called by the user in Update to handle when a packet is received
 	//Manages calling RecievePacket on the local module or RoutePacket
 	//to get the packet to its final destination
 	virtual void RecievePacket(const PacketHeader& header, Buffer& packet);
 
-	//Returns true if modules is directly connected to this device
+	//Returns true if this module is directly connected to this device
 	bool HasModule(ModuleID id);
+
+	ModuleID GetID() const { return m_ModuleID; }
 
 	virtual ~SLICoreModule() {}
 
 protected:
 	void UpdateLocalModules();
+
+	inline void Info(const char* message)  const { LogInfo(GetID(), message); }
+	inline void Warn(const char* message)  const { LogInfo(GetID(), message); }
+	inline void Error(const char* message) const { LogInfo(GetID(), message); }
 
 private:
 	//Re-sends a packet across the wire/radio to the intended recipient
@@ -124,6 +146,9 @@ protected:
 	//Either a pointer to the module if is packets can be sent directly to it
 	//Or nullptr if a packet being sent there needs routing
 	std::array<SLIModule*, static_cast<int>(ModuleID::MAX_MODULE_ID)> m_ContainedModules;
+
+private:
+	ModuleID m_ModuleID;
 };
 
 class Buffer;

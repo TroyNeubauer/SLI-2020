@@ -2,16 +2,20 @@
 #include "InvokeCpp.h"
 #include "SensorsBoard.h"
 
-void InvokeCpp()
+extern "C"
 {
-	SensorsBoard board;
 
-	board.Init();
-
-	while (true)
+	void InvokeCpp(SPI_HandleTypeDef* spi1, UART_HandleTypeDef* uart4, UART_HandleTypeDef* uart5)
 	{
-		board.Update();
+		SensorsBoard board;
+
+		board.Init(spi1, uart4, uart5);
+
+		while (true)
+		{
+			board.Update();
+		}
+
+
 	}
-
-
 }
