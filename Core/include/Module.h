@@ -14,6 +14,8 @@ enum class ModuleID
 	MAX_MODULE_ID = 16,
 };
 
+const char* GetModuleIDName(ModuleID id);
+
 using PacketTypeValue = uint8_t;
 
 namespace PacketType {

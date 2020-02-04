@@ -16,11 +16,25 @@ void CommunicationsBoard::Update()
 	HAL_UART_Transmit(UART1, reinterpret_cast<uint8_t*>(const_cast<char*>(message)), 5, HAL_MAX_DELAY);
 	HAL_UART_Transmit(UART2, reinterpret_cast<uint8_t*>(const_cast<char*>(message)), 5, HAL_MAX_DELAY);
 
-	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, GPIO_PIN_RESET);
+	HAL_Delay(10);
+
 	HAL_SPI_Transmit(SPI, (uint8_t*) message, 5, HAL_MAX_DELAY);
-	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, GPIO_PIN_SET);
 
 	HAL_Delay(10);
+	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, GPIO_PIN_SET);
+
+
+	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_13, GPIO_PIN_RESET);
+
+	HAL_Delay(500);
+
+	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_13, GPIO_PIN_SET);
+
+	HAL_Delay(500);
+
 
 }
 
