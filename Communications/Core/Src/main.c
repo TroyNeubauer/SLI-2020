@@ -107,7 +107,9 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  //InvokeCpp(&hspi1, &huart1, &huart2);
+  HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_12);
+
+  InvokeCpp(&hspi1, &huart1, &huart2);
   while (1)
   {
     /* USER CODE END WHILE */

@@ -51,7 +51,7 @@ sleep 1
 while !($command 2>&1 | grep 'jolly good' &> /dev/null);
 do
 	$command
-	sleep 1
+	sleep 0.2
 	clear
 done
 
