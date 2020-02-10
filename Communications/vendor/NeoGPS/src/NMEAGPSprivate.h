@@ -88,14 +88,16 @@
 
     void lock() const
       {
-        if (processing_style == PS_INTERRUPT)
-          noInterrupts();
+        //if (processing_style == PS_INTERRUPT)
+        //  noInterrupts();
+        //FIXME commented on 2/10. This might need to be changed in the future
       }
 
     void unlock() const
       {
-        if (processing_style == PS_INTERRUPT)
-          interrupts();
+        //if (processing_style == PS_INTERRUPT)
+        //  interrupts();
+        //FIXME commented on 2/10. This might need to be changed in the future
       }
 
   protected:

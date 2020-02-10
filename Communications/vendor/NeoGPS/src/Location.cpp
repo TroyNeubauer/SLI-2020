@@ -115,7 +115,7 @@ float Location_t::BearingTo( const Location_t & p1, const Location_t & p2 )
   }
 
   if (bearing < 0.0)
-    bearing += TWO_PI;
+    bearing += 2.0 * PI;
 
   return bearing;
 

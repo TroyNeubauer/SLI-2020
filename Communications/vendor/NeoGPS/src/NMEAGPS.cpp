@@ -17,7 +17,7 @@
 
 #include "NMEAGPS.h"
 
-#include <Stream.h>
+//#include <Stream.h>
 
 // Check configurations
 
@@ -1969,7 +1969,7 @@ const gps_fix NMEAGPS::read()
 } // read
 
 //----------------------------------------------------------------
-
+/*
 void NMEAGPS::poll( Stream *device, nmea_msg_t msg )
 {
   //  Only the ublox documentation references talker ID "EI".
@@ -2107,3 +2107,4 @@ void NMEAGPS::send_P( Stream *device, const __FlashStringHelper *msg )
   }
 
 } // send_P
+*/

@@ -18,10 +18,11 @@
 #include "NeoTime.h"
 
 // For strtoul declaration
-#include <stdlib.h>
+#include <cstdlib>
+#include <cstring>
 
-#include <Print.h>
-
+//#include <Print.h>
+/*
 Print & operator<<( Print& outs, const NeoGPS::time_t& t )
 {
   outs.print( t.full_year( t.year ) );
@@ -43,6 +44,7 @@ Print & operator<<( Print& outs, const NeoGPS::time_t& t )
 
   return outs;
 }
+*/
 
 using NeoGPS::time_t;
 
@@ -50,7 +52,8 @@ bool time_t::parse(str_P s)
 {
   static size_t BUF_MAX = 32;
   char buf[BUF_MAX];
-  strcpy_P(buf, s);
+  //strcpy_P(buf, s);
+  strcpy(buf, s);
   char* sp = &buf[0];
   uint16_t value = strtoul(sp, &sp, 10);
 

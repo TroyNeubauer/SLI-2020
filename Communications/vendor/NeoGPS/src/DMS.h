@@ -20,7 +20,7 @@
 
 #include "NeoGPS_cfg.h"
 #include <stdint.h>
-class Print;
+//class Print;
 
 enum Hemisphere_t { NORTH_H = 0, SOUTH_H = 1, EAST_H = 0, WEST_H = 1 };
 
@@ -46,10 +46,10 @@ public:
   void  From( int32_t deg_1E7 );
 
   // Print DMS as the funky NMEA DDDMM.mmmm format
-  void printDDDMMmmmm( Print & outs ) const;
+  //void printDDDMMmmmm( Print & outs ) const;
 
 } NEOGPS_PACKED;
 
-extern Print & operator << ( Print & outs, const DMS_t & );
+//extern Print & operator << ( Print & outs, const DMS_t & );
 
 #endif

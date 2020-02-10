@@ -18,12 +18,16 @@
 //  You should have received a copy of the GNU General Public License
 //  along with NeoGPS.  If not, see <http://www.gnu.org/licenses/>.
 
+//#include <type.h>
+
 #include "CosaCompat.h"
 
-#include <Arduino.h>
-#ifdef __AVR__
-  #include <avr/interrupt.h>
-#endif
+#include <ctype.h>
+
+//#include <Arduino.h>
+//#ifdef __AVR__
+//  #include <avr/interrupt.h>
+//#endif
 
 #include "GPSfix.h"
 #include "NMEAGPS_cfg.h"
@@ -112,13 +116,13 @@ public:
     //   are available to be "read" from the fix buffer.  The GPS port
     //   object is passed in so a char can be read if port.available().
 
-    uint8_t available( Stream & port )
+/*    uint8_t available( Stream & port )
       {
         if (processing_style == PS_POLLING)
           while (port.available())
             handle( port.read() );
         return _available();
-      }
+      }*/
     uint8_t available() const volatile { return _available(); };
 
     //.......................................................................
@@ -323,7 +327,7 @@ public:
 
     //.......................................................................
     // Request the specified NMEA sentence.  Not all devices will respond.
-
+/*
     static void poll( Stream *device, nmea_msg_t msg );
 
     //.......................................................................
@@ -332,7 +336,7 @@ public:
 
     static void send( Stream *device, const char *msg );
     static void send_P( Stream *device, const __FlashStringHelper *msg );
-
+*/
   #include "NMEAGPSprivate.h"
 
 } NEOGPS_PACKED;

@@ -18,6 +18,8 @@
 //  You should have received a copy of the GNU General Public License
 //  along with NeoGPS.  If not, see <http://www.gnu.org/licenses/>.
 
+#include <cstdint>
+
 #include "NeoTime.h"
 
 class GPSTime

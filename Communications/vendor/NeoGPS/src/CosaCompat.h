@@ -18,6 +18,8 @@
 //  You should have received a copy of the GNU General Public License
 //  along with NeoGPS.  If not, see <http://www.gnu.org/licenses/>.
 
+#include <cstdint>
+
 #ifdef __AVR__
 
   #include <avr/pgmspace.h>
@@ -25,10 +27,15 @@
 #else
 
   #define PGM_P const char *
+  #define __FlashStringHelper char
+  uint8_t pgm_read_byte(const void* address);
+  void* pgm_read_ptr(const void* address);
+  #define F(str) str
 
 #endif
 
 typedef PGM_P str_P;
-#define __PROGMEM PROGMEM
+//#define __PROGMEM PROGMEM
+#define __PROGMEM
 
 #endif

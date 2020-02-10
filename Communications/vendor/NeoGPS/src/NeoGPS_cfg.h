@@ -33,7 +33,7 @@
 // There may also be compiler-specific switches that affect packing and the
 // code which accesses packed members.  YMMV.
 
-#include <Arduino.h>
+//#include <Arduino.h>
 
 #ifdef __AVR__
   #define NEOGPS_PACKED_DATA
@@ -91,13 +91,13 @@
 //
 
 
-#if (                                              \
+#if (defined(ARDUINO) &&(                                              \
       (ARDUINO < 10606)                          | \
      ((10700  <= ARDUINO) & (ARDUINO <= 10799 )) | \
      ((107000 <= ARDUINO) & (ARDUINO <= 107999))   \
     )                                              \
         &                                          \
-    !defined(ESP8266)  // PlatformIO Pull Request #82
+    !defined(ESP8266)) // PlatformIO Pull Request #82
 
   #define CONST_CLASS_DATA static const
   

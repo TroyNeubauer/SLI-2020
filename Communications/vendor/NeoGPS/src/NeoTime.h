@@ -18,6 +18,8 @@
 //  You should have received a copy of the GNU General Public License
 //  along with NeoGPS.  If not, see <http://www.gnu.org/licenses/>.
 
+#include <cstdint>
+
 #include "NeoGPS_cfg.h"
 #include "CosaCompat.h"
 
@@ -269,7 +271,7 @@ struct time_t {
    */
   bool parse(str_P s);
 
-  static const uint8_t days_in[] PROGMEM; // month index is 1..12, PROGMEM
+  static const uint8_t days_in[] __PROGMEM; // month index is 1..12, PROGMEM
 
 protected:
   static uint8_t  epoch_offset() { return s_epoch_offset; };

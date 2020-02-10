@@ -22,6 +22,11 @@
 
 class NMEAGPS;
 
+#include <cstdint>
+#include <math.h>
+
+#define PI 3.14159265359
+
 namespace NeoGPS {
 
 class Location_t

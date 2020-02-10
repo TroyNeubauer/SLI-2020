@@ -18,8 +18,8 @@
 //  You should have received a copy of the GNU General Public License
 //  along with NeoGPS.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <Arduino.h>
-
+//#include <Arduino.h>
+/*
 extern Print & operator <<( Print & outs, const bool b );
 extern Print & operator <<( Print & outs, const char c );
 extern Print & operator <<( Print & outs, const uint16_t v );
@@ -27,7 +27,7 @@ extern Print & operator <<( Print & outs, const uint32_t v );
 extern Print & operator <<( Print & outs, const int32_t v );
 extern Print & operator <<( Print & outs, const uint8_t v );
 extern Print & operator <<( Print & outs, const __FlashStringHelper *s );
-
+*/
 class gps_fix;
 
 /**
@@ -40,11 +40,13 @@ class gps_fix;
  * @param[in] fix gps_fix instance.
  * @return iostream.
  */
+
+/*
 extern Print & operator <<( Print &outs, const gps_fix &fix );
 
 class NMEAGPS;
 
 extern void trace_header( Print & outs );
 extern void trace_all( Print & outs, const NMEAGPS &gps, const gps_fix &fix );
-
+*/
 #endif

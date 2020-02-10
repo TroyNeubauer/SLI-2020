@@ -19,7 +19,7 @@
 #include "NMEAGPS.h"
 
 //#define USE_FLOAT
-
+/*
 Print& operator <<( Print &outs, const bool b )
   { outs.print( b ? 't' : 'f' ); return outs; }
 
@@ -487,3 +487,4 @@ void trace_all( Print & outs, const NMEAGPS &gps, const gps_fix &fix )
   outs << '\n';
 
 } // trace_all
+*/
