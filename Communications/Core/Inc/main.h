@@ -55,6 +55,8 @@ void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
 
+void DebugPrint(const char* message);
+
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/

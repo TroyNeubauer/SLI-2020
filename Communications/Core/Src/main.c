@@ -49,6 +49,8 @@ UART_HandleTypeDef huart1;
 UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
+#define GPS_UART &huart2
+#define RADIO_UART &huart1
 
 /* USER CODE END PV */
 
@@ -100,21 +102,25 @@ int main(void)
   MX_SPI1_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
-
+  DebugPrint("HAL Init complete");
   /* USER CODE END 2 */
  
  
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+
+  DebugPrint("Lighting pin");
   HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_12);
 
-  InvokeCpp(&hspi1, &huart1, &huart2);
+  //InvokeCpp(&hspi1, RADIO_UART, GPS_UART);
+  int i = 0;
   while (1)
   {
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+	DebugPrint("Loop top");
 
 	HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_12);
 	HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_13);
@@ -128,6 +134,16 @@ int main(void)
 
 	HAL_Delay(500);
 
+	const char* message = "test!";
+	HAL_UART_Transmit(RADIO_UART, (uint8_t*) message, 5, HAL_MAX_DELAY);
+	HAL_UART_Transmit(RADIO_UART, (uint8_t*) message, 5, HAL_MAX_DELAY);
+	if (i == 6)
+	{
+		Error_Handler();
+	}
+	printf("i is %d", i);
+	DebugPrint("Loop done");
+    i++;
   }
   /* USER CODE END 3 */
 }
@@ -338,8 +354,55 @@ void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
   /* User can add his own implementation to report the HAL error return state */
+  while (1)
+  {
+	const int flashCount = 3;
+	const int onTime = 25, offTime = 95;
+	//How often to show the flashes
+	const int cycleTime = 1000;
+	const int waitTime = cycleTime - (flashCount * onTime + flashCount * offTime);
 
+	for (int i = 0; i < flashCount; i++)
+	{
+		HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_SET);
+		HAL_Delay(onTime);
+		HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_RESET);
+		HAL_Delay(offTime);
+	}
+	if (waitTime > 0)
+	{
+		HAL_Delay(waitTime);
+	}
+
+  }
   /* USER CODE END Error_Handler_Debug */
+}
+
+static const char* DEBUG_HEADER = "[STMF103 DEBUG]: ";
+
+void DebugPrint(const char* message)
+{
+	int debugSize = strlen(DEBUG_HEADER);
+	int messageSize = strlen(message);
+	HAL_UART_Transmit(RADIO_UART, (uint8_t*) DEBUG_HEADER, debugSize, HAL_MAX_DELAY);
+	HAL_UART_Transmit(RADIO_UART, (uint8_t*) message, messageSize, HAL_MAX_DELAY);
+
+}
+
+int _read(int file, char *ptr, int len)
+{
+	HAL_UART_Receive(RADIO_UART, ptr, len, HAL_MAX_DELAY);
+	return len;
+}
+
+static const char* WRITE_HEADER = "[STMF103 _write]: ";
+
+
+int _write(int file, char *ptr, int len)
+{
+	HAL_UART_Transmit(RADIO_UART, WRITE_HEADER, strlen(WRITE_HEADER), HAL_MAX_DELAY);
+	HAL_UART_Transmit(RADIO_UART, ptr, len, HAL_MAX_DELAY);
+	return len;
 }
 
 #ifdef  USE_FULL_ASSERT
