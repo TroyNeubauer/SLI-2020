@@ -1,6 +1,8 @@
 
 #include "CommunicationsBoard.h"
 
+#include "InvokeCpp.h"
+
 extern "C"
 {
 

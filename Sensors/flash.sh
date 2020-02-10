@@ -1,1 +1,1 @@
-st-flash --reset write Release/Sensors.bin 0x8000000
+st-flash --reset write Debug/Sensors.bin 0x8000000

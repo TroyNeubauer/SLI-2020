@@ -35,10 +35,25 @@ void CommunicationsBoard::Update()
 	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_SET);
 	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_13, GPIO_PIN_RESET);
 
+	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_14, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_15, GPIO_PIN_RESET);
+
+	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_0, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_1, GPIO_PIN_SET);
+
+
 	HAL_Delay(500);
 
-	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_RESET);
-	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_13, GPIO_PIN_SET);
+	HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_12);
+	HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_13);
+
+	HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
+	HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_14);
+	HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_15);
+
+	HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_0);
+	HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_1);
 
 	HAL_Delay(500);
 
@@ -51,7 +66,8 @@ void CommunicationsBoard::RoutePacket(const PacketHeader &header, Buffer &packet
 	{
 		uint8_t *buffer = const_cast<uint8_t*>(reinterpret_cast<const uint8_t*>(&header));
 		HAL_SPI_Transmit(SPI, buffer, sizeof(header) + SizeOfPacket(header, packet), 0);
-	} else
+	}
+	else
 	{
 		//Forward to the sensor board
 
