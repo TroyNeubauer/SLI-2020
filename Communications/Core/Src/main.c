@@ -52,6 +52,8 @@ UART_HandleTypeDef huart1;
 UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
+#define GPS_UART &huart2
+#define RADIO_UART &huart1
 
 /* USER CODE END PV */
 
@@ -109,6 +111,8 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+
+  DebugPrint("Lighting pin");
   HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_12);
 
   //InvokeCpp(&hspi1, &huart1, &huart2);
@@ -374,7 +378,27 @@ void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
   /* User can add his own implementation to report the HAL error return state */
+  while (1)
+  {
+	const int flashCount = 3;
+	const int onTime = 25, offTime = 95;
+	//How often to show the flashes
+	const int cycleTime = 1000;
+	const int waitTime = cycleTime - (flashCount * onTime + flashCount * offTime);
 
+	for (int i = 0; i < flashCount; i++)
+	{
+		HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_SET);
+		HAL_Delay(onTime);
+		HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_RESET);
+		HAL_Delay(offTime);
+	}
+	if (waitTime > 0)
+	{
+		HAL_Delay(waitTime);
+	}
+
+  }
   /* USER CODE END Error_Handler_Debug */
 }
 
