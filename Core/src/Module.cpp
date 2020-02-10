@@ -2,6 +2,13 @@
 #include "Module.h"
 #include "Formatter.h"
 
+#include <algorithm>
+
+SLICoreModule::SLICoreModule(ModuleID self) : m_ModuleID(self)
+{
+	std::fill(m_ContainedModules.begin(), m_ContainedModules.end(), nullptr);
+}
+
 void SLIModule::SendPacket(const PacketHeader& header, Buffer& packet)
 {
 	m_CoreModule->SendPacket(header, packet);
@@ -71,12 +78,19 @@ bool SLICoreModule::HasModule(ModuleID id)
 
 void SLICoreModule::UpdateLocalModules()
 {
+	SizedFormatter<128> formatter;
+	formatter << "SLICoreModule::UpdateLocalModules. Size is " << ((uint32_t) m_ContainedModules.size());
+	Warn(formatter.c_str());
 	for (unsigned int i = 0; i < m_ContainedModules.size(); i++)
 	{
 		SLIModule* module = m_ContainedModules[i];
+		formatter.Clear();
+		formatter << "Got module" << ((uint32_t) reinterpret_cast<void*>(module));
+		Warn(formatter.c_str());
 		if (module) module->Update();
 	}
 }
+
 
 uint16_t SizeOfPacket(const PacketHeader& header, Buffer& packet)
 {
@@ -85,21 +99,28 @@ uint16_t SizeOfPacket(const PacketHeader& header, Buffer& packet)
 
 void LogInfo(ModuleID module, const char* message)
 {
-	SizedFormatter<256> formatter;
-	formatter << '[' << GetModuleIDName(module) << "]: " << message;
+	SerialPrint("[");
+	SerialPrint(GetModuleIDName(module));
+	SerialPrint(" info]: ");
+	SerialPrint(message);
 }
 
 void LogWarn(ModuleID module, const char* message)
 {
-	SizedFormatter<256> formatter;
-	formatter << '[' << GetModuleIDName(module) << "] warn: " << message;
+	SerialPrint("[");
+	SerialPrint(GetModuleIDName(module));
+	SerialPrint(" Warn]: ");
+	SerialPrint(message);
 }
 
 void LogError(ModuleID module, const char* message)
 {
-	SizedFormatter<256> formatter;
-	formatter << '[' << GetModuleIDName(module) << "] ERROR!: " << message;
+	SerialPrint("[");
+	SerialPrint(GetModuleIDName(module));
+	SerialPrint(" ERROR]: ");
+	SerialPrint(message);
 }
+
 
 const char* GetModuleIDName(ModuleID id)
 {

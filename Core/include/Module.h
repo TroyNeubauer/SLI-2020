@@ -71,7 +71,11 @@ void LogInfo(ModuleID module, const char* message);
 void LogWarn(ModuleID module, const char* message);
 void LogError(ModuleID module, const char* message);
 
-void SerialPrint(const char* message);
+extern "C"
+{
+	void SerialPrint(const char* message);
+}
+
 
 //An SLI module represents a sensor or processor that can send and receive packets
 //Eg. the radio, GPS, altimeter, etc
@@ -85,7 +89,7 @@ public:
 	virtual void SendPacket(const PacketHeader& header, Buffer& packet);
 	virtual void RecievePacket(const PacketHeader& header, Buffer& packet) = 0;
 	inline ModuleID GetID() const { return m_ModuleID; }
-
+	void Log(const char* message);
 
 	virtual ~SLIModule() {}
 
@@ -97,6 +101,7 @@ protected:
 
 
 private:
+
 	SLICoreModule* m_CoreModule;
 	ModuleID m_ModuleID;
 };
@@ -108,7 +113,7 @@ private:
 class SLICoreModule
 {
 public:
-	SLICoreModule(ModuleID self) : m_ModuleID(self) {}
+	SLICoreModule(ModuleID self);
 
 	virtual void Update() = 0;
 

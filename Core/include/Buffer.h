@@ -19,6 +19,15 @@ public:
 		m_Offset += sizeof(T);
 	}
 
+public:
+
+#ifdef STM
+	static thread_local char BUF[128];
+#else//Ground Station
+	static thread_local char BUF[1024];
+
+#endif
+
 private:
 	uint8_t* m_Buf;
 	uint32_t m_Offset;

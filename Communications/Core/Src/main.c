@@ -38,6 +38,13 @@
 /* USER CODE BEGIN PD */
 #define RADIO_UART &huart2
 #define GPS_UART &huart1
+
+#define INIT_STAGE_NONE 0
+#define INIT_STAGE_HAL 1
+#define INIT_STAGE_SYSTEM_CLOCK 2
+#define INIT_STAGE_PERHIPERALS 3
+char initStage = INIT_STAGE_NONE;
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -52,8 +59,8 @@ UART_HandleTypeDef huart1;
 UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
-#define GPS_UART &huart2
-#define RADIO_UART &huart1
+#define GPS_UART &huart1
+#define RADIO_UART &huart2
 
 /* USER CODE END PV */
 
@@ -89,13 +96,14 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
-
+  initStage = INIT_STAGE_HAL;
   /* USER CODE END Init */
 
   /* Configure the system clock */
   SystemClock_Config();
 
   /* USER CODE BEGIN SysInit */
+  initStage = INIT_STAGE_SYSTEM_CLOCK;
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
@@ -104,6 +112,7 @@ int main(void)
   MX_SPI1_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
+  initStage = INIT_STAGE_PERHIPERALS;
   Log("SystemInit complete!");
   /* USER CODE END 2 */
  
@@ -112,34 +121,12 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 
-  DebugPrint("Lighting pin");
+  Log("Lighting pin");
   HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_12);
+  HAL_Delay(3000);
 
-  //InvokeCpp(&hspi1, &huart1, &huart2);
-  int i = 0;
-  while (1)
-  {
-    /* USER CODE END WHILE */
+  InvokeCpp(&hspi1, RADIO_UART, GPS_UART);
 
-    /* USER CODE BEGIN 3 */
-    Log("Loop");
-
-	HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_12);
-	HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_13);
-
-	HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
-	HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_14);
-	HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_15);
-
-	HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_0);
-	HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_1);
-
-	printf("Trying printf! %d", i);
-
-
-	HAL_Delay(500);
-    i++;
-  }
   /* USER CODE END 3 */
 }
 
@@ -349,23 +336,20 @@ void Log(const char* message)
 	HAL_UART_Transmit(RADIO_UART, &c, 1, HAL_MAX_DELAY);
 }
 
-static const char* LIBC_HEADER = "[LIBC]: ";
-
-int _read(int file, char *ptr, int len)
+void SerialPrint(const char* message)
 {
-	if (len > 1)
-	{
-		HAL_UART_Transmit(RADIO_UART, LIBC_HEADER, strlen(LIBC_HEADER), HAL_MAX_DELAY);
-	}
-	HAL_UART_Transmit(RADIO_UART, ptr, len, HAL_MAX_DELAY);
-	return len;
+	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_13, GPIO_PIN_SET);
+
+	HAL_UART_Transmit(RADIO_UART, message, strlen(message), HAL_MAX_DELAY);
+	char c = '\n';
+
+	HAL_UART_Transmit(RADIO_UART, &c, 1, HAL_MAX_DELAY);
+	//Delay for longer if we haven't initialized the radio yet
+	HAL_Delay( (initStage >= INIT_STAGE_PERHIPERALS) ? 5 : 100);
+
+	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_13, GPIO_PIN_RESET);
 }
 
-int _write(int file, char *ptr, int len)
-{
-	HAL_UART_Receive(RADIO_UART, ptr, len, HAL_MAX_DELAY);
-	return len;
-}
 
 
 /* USER CODE END 4 */
