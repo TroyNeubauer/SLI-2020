@@ -47,10 +47,10 @@ elif(sys.argv[1] == 'c' and sys.argv[2] == 'r'):
 
 while(True):
 	try:
-		output = subprocess.check_output(command.split(' '))
+		output = subprocess.check_output(command.split(' '), stderr=subprocess.STDOUT)
 	except(subprocess.CalledProcessError):
 		output = b''
-	
+
 	if b'jolly good' in output:
 		print('JOLLY GOOD!')
 		break

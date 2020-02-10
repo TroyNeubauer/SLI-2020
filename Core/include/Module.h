@@ -1,6 +1,6 @@
 #pragma once
 
-#include <stdint.h>
+#include <cstdint>
 
 #include <type_traits>
 #include <array>
@@ -89,6 +89,7 @@ public:
 	virtual void SendPacket(const PacketHeader& header, Buffer& packet);
 	virtual void RecievePacket(const PacketHeader& header, Buffer& packet) = 0;
 	inline ModuleID GetID() const { return m_ModuleID; }
+	inline int32_t GetIntID() const { return static_cast<int32_t>(m_ModuleID); }
 	void Log(const char* message);
 
 	virtual ~SLIModule() {}
@@ -127,8 +128,10 @@ public:
 
 	//Returns true if this module is directly connected to this device
 	bool HasModule(ModuleID id);
+	void AddModule(SLIModule* module);
 
 	ModuleID GetID() const { return m_ModuleID; }
+
 
 	virtual ~SLICoreModule() {}
 

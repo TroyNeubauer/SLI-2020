@@ -78,15 +78,9 @@ bool SLICoreModule::HasModule(ModuleID id)
 
 void SLICoreModule::UpdateLocalModules()
 {
-	SizedFormatter<128> formatter;
-	formatter << "SLICoreModule::UpdateLocalModules. Size is " << ((uint32_t) m_ContainedModules.size());
-	Warn(formatter.c_str());
 	for (unsigned int i = 0; i < m_ContainedModules.size(); i++)
 	{
 		SLIModule* module = m_ContainedModules[i];
-		formatter.Clear();
-		formatter << "Got module" << ((uint32_t) reinterpret_cast<void*>(module));
-		Warn(formatter.c_str());
 		if (module) module->Update();
 	}
 }
@@ -96,6 +90,24 @@ uint16_t SizeOfPacket(const PacketHeader& header, Buffer& packet)
 {
 	return 0;
 }
+
+void SLICoreModule::AddModule(SLIModule* module)
+{
+	if (m_ContainedModules[module->GetIntID()] != nullptr)
+	{
+		SizedFormatter<64> formatter;
+		formatter << "Module already exists! ID " << module->GetIntID();
+		Error(formatter.c_str());
+	}
+	else
+	{
+		m_ContainedModules[module->GetIntID()] = module;
+		SizedFormatter<64> formatter;
+		formatter << "Added module! ID " << module->GetIntID();
+		Info(formatter.c_str());
+	}
+}
+
 
 void LogInfo(ModuleID module, const char* message)
 {
