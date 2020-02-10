@@ -23,6 +23,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include <stdio.h>
 
 #include "InvokeCpp.h"
 
@@ -35,6 +36,8 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+#define RADIO_UART &huart2
+#define GPS_UART &huart1
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -91,7 +94,6 @@ int main(void)
   SystemClock_Config();
 
   /* USER CODE BEGIN SysInit */
-
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
@@ -100,7 +102,7 @@ int main(void)
   MX_SPI1_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
-
+  Log("SystemInit complete!");
   /* USER CODE END 2 */
  
  
@@ -109,12 +111,14 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_12);
 
-  InvokeCpp(&hspi1, &huart1, &huart2);
+  //InvokeCpp(&hspi1, &huart1, &huart2);
+  int i = 0;
   while (1)
   {
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+    Log("Loop");
 
 	HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_12);
 	HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_13);
@@ -126,8 +130,11 @@ int main(void)
 	HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_0);
 	HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_1);
 
-	HAL_Delay(500);
+	printf("Trying printf! %d", i);
 
+
+	HAL_Delay(500);
+    i++;
   }
   /* USER CODE END 3 */
 }
@@ -327,6 +334,35 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+static const char* RADIO_HEADER = "[stmf103 LOG]: ";
+
+
+void Log(const char* message)
+{
+	HAL_UART_Transmit(RADIO_UART, RADIO_HEADER, strlen(RADIO_HEADER), HAL_MAX_DELAY);
+	HAL_UART_Transmit(RADIO_UART, message, strlen(message), HAL_MAX_DELAY);
+	char c = '\n';
+	HAL_UART_Transmit(RADIO_UART, &c, 1, HAL_MAX_DELAY);
+}
+
+static const char* LIBC_HEADER = "[LIBC]: ";
+
+int _read(int file, char *ptr, int len)
+{
+	if (len > 1)
+	{
+		HAL_UART_Transmit(RADIO_UART, LIBC_HEADER, strlen(LIBC_HEADER), HAL_MAX_DELAY);
+	}
+	HAL_UART_Transmit(RADIO_UART, ptr, len, HAL_MAX_DELAY);
+	return len;
+}
+
+int _write(int file, char *ptr, int len)
+{
+	HAL_UART_Receive(RADIO_UART, ptr, len, HAL_MAX_DELAY);
+	return len;
+}
+
 
 /* USER CODE END 4 */
 
@@ -341,6 +377,8 @@ void Error_Handler(void)
 
   /* USER CODE END Error_Handler_Debug */
 }
+
+
 
 #ifdef  USE_FULL_ASSERT
 /**

@@ -2,6 +2,7 @@
 
 #include "stm32f1xx_hal_uart.h"
 
+
 //See http://stm32f4-discovery.net/2014/07/library-21-read-sd-card-fatfs-stm32f4xx-devices/
 void SerialPrint(const char* message)
 {
