@@ -14,12 +14,15 @@
 #include "main.h"
 
 
+CommunicationsBoard* boardPtr = nullptr;
+
 extern "C"
 {
 	void InvokeCpp(SPI_HandleTypeDef* spi1, UART_HandleTypeDef* radioUart, UART_HandleTypeDef* GPSUart)
 	{
 
 		CommunicationsBoard board(spi1, radioUart, GPSUart);
+		boardPtr = &board;
 		board.Init();
 
 		GPS gps(&board, GPSUart);

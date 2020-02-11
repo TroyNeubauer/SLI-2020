@@ -30,8 +30,8 @@ namespace PacketType {
 	//This module is sending new data (altitude reading, velocity, etc.)
 	constexpr PacketTypeValue DATA = 2;
 
-	//Some type of error has occurred
-	constexpr PacketTypeValue ERROR = 3;
+	//A string message of a particular log level
+	constexpr PacketTypeValue MESSAGE = 3;
 
 	//A device is asking another device for something
 	constexpr PacketTypeValue REQUEST = 4;
@@ -39,8 +39,9 @@ namespace PacketType {
 	//A device is asking another device for something
 	constexpr PacketTypeValue RESPONSE = 5;
 
+
 	//Used to identify
-	constexpr PacketTypeValue MAX_PACKET_TYPE = 6;
+	constexpr PacketTypeValue MAX_PACKET_TYPE = 7;
 }
 
 using RequestTypeValue = uint8_t;
@@ -51,11 +52,33 @@ namespace RequestType {
 	constexpr RequestTypeValue WAKE = 1;
 }
 
+using StatusTypeValue = uint8_t;
+
+namespace StatusValue {
+
+	constexpr StatusTypeValue GPS_LOCK = 0;
+	constexpr StatusTypeValue GPS_10HZ = 1;
+	constexpr StatusTypeValue GPS_115200_BAUD_RATE = 1;
+
+}
+
+using DebugLevelType = uint8_t;
+
+namespace DebugLevel {
+
+	constexpr DebugLevelType TRACE = 0;
+	constexpr DebugLevelType INFO = 1;
+	constexpr DebugLevelType WARN = 2;
+	constexpr DebugLevelType ERROR = 3;
+
+}
+
 struct PacketHeader
 {
 	uint32_t ID;
 	uint32_t UnixSeconds;//The time this packet was sent at
 	uint32_t NanoSeconds;
+
 	//Where the packet originally came from
 	ModuleID Destination;
 	ModuleID Forwarder;
@@ -64,6 +87,9 @@ struct PacketHeader
 	PacketTypeValue Type;
 
 };
+
+
+
 
 class SLICoreModule;
 

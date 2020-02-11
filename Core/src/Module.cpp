@@ -49,14 +49,7 @@ void SLICoreModule::DeliverLocalPacket(const PacketHeader& header, Buffer& packe
 	}
 	else
 	{
-		if (m_ContainedModules[intID])
-		{
-			m_ContainedModules[intID]->RecievePacket(header, packet);
-		}
-		else
-		{
-			//TODO. Fail
-		}
+		m_ContainedModules[intID]->RecievePacket(header, packet);
 	}
 }
 
