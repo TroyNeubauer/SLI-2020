@@ -13,6 +13,8 @@
 #include "Modules/GPS.h"
 #include "main.h"
 
+#include "Core.h"
+
 
 CommunicationsBoard* boardPtr = nullptr;
 
@@ -36,3 +38,25 @@ extern "C"
 	}
 
 }
+
+void SerialPrint(Formatter& formatter)
+{
+	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_13, GPIO_PIN_SET);
+
+	formatter << '\n';
+	HAL_UART_Transmit(RADIO_UART, formatter.Data(), formatter.Size(), HAL_MAX_DELAY);
+
+	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_13, GPIO_PIN_RESET);
+}
+
+void SLIAssertFailed(const char* message)
+{
+	boardPtr->Error("SLI ASSERT FAILED!!!");
+	boardPtr->Error(message);
+}
+
+void const char* GetParentModuleName()
+{
+	return "stmF103";
+}
+

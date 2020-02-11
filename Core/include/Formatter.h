@@ -39,6 +39,7 @@ public:
 
 	const char* c_str();
 	inline operator const char*() { return c_str(); }
+	inline const char* Data() { return m_Buf; }
 
 	inline std::size_t Capacity() const { return m_Capacity; }
 	inline std::size_t Size() const { return m_Offset; }

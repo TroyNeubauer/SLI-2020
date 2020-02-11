@@ -6,6 +6,7 @@
 #include <array>
 
 #include "Buffer.h"
+#include "Formatter.h"
 
 enum class ModuleID
 {
@@ -90,17 +91,13 @@ struct PacketHeader
 
 
 
+Formatter BeginMessage(const char* device, const char* level);
+
+//Implemented by each parent-module
+void SerialPrint(Formatter& formatter);
+const char* GetParentModuleName();
 
 class SLICoreModule;
-
-void LogInfo(ModuleID module, const char* message);
-void LogWarn(ModuleID module, const char* message);
-void LogError(ModuleID module, const char* message);
-
-extern "C"
-{
-	void SerialPrint(const char* message);
-}
 
 
 //An SLI module represents a sensor or processor that can send and receive packets
@@ -161,12 +158,12 @@ public:
 
 	virtual ~SLICoreModule() {}
 
-protected:
-	void UpdateLocalModules();
-
 	inline void Info(const char* message)  const { LogInfo(GetID(), message); }
 	inline void Warn(const char* message)  const { LogInfo(GetID(), message); }
 	inline void Error(const char* message) const { LogInfo(GetID(), message); }
+
+protected:
+	void UpdateLocalModules();
 
 private:
 	//Re-sends a packet across the wire/radio to the intended recipient

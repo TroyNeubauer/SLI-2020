@@ -98,32 +98,38 @@ void SLICoreModule::AddModule(SLIModule* module)
 		SizedFormatter<64> formatter;
 		formatter << "Added module! ID " << module->GetIntID();
 		Info(formatter.c_str());
+		module->Init();
 	}
 }
 
-
-void LogInfo(ModuleID module, const char* message)
+void Formatter BeginInfoMessage()
 {
-	SerialPrint("[");
-	SerialPrint(GetModuleIDName(module));
-	SerialPrint(" info]: ");
-	SerialPrint(message);
+	Formatter result;
+	result << '[';
+	result << GetParentModuleName();
+	result << ' ';
+	result << " info]: ";
+	return result;
 }
 
-void LogWarn(ModuleID module, const char* message)
+void Formatter BeginWarnMessage()
 {
-	SerialPrint("[");
-	SerialPrint(GetModuleIDName(module));
-	SerialPrint(" Warn]: ");
-	SerialPrint(message);
+	Formatter result;
+	result << '[';
+	result << GetParentModuleName();
+	result << ' ';
+	result << " Warn]: ";
+	return result;
 }
 
-void LogError(ModuleID module, const char* message)
+void Formatter BeginErrorMessage()
 {
-	SerialPrint("[");
-	SerialPrint(GetModuleIDName(module));
-	SerialPrint(" ERROR]: ");
-	SerialPrint(message);
+	Formatter result;
+	result << '[';
+	result << GetParentModuleName();
+	result << ' ';
+	result << " ERROR]: ";
+	return result;
 }
 
 

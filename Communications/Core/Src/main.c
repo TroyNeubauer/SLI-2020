@@ -356,31 +356,6 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-static const char* RADIO_HEADER = "[stmf103 LOG]: ";
-
-
-void Log(const char* message)
-{
-	HAL_UART_Transmit(RADIO_UART, RADIO_HEADER, strlen(RADIO_HEADER), HAL_MAX_DELAY);
-	HAL_UART_Transmit(RADIO_UART, message, strlen(message), HAL_MAX_DELAY);
-	char c = '\n';
-	HAL_UART_Transmit(RADIO_UART, &c, 1, HAL_MAX_DELAY);
-}
-
-void SerialPrint(const char* message)
-{
-	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_13, GPIO_PIN_SET);
-
-	HAL_UART_Transmit(RADIO_UART, message, strlen(message), HAL_MAX_DELAY);
-	char c = '\n';
-
-	HAL_UART_Transmit(RADIO_UART, &c, 1, HAL_MAX_DELAY);
-	//Delay for longer if we haven't initialized the radio yet
-	HAL_Delay( (initStage >= INIT_STAGE_PERHIPERALS) ? 5 : 100);
-
-	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_13, GPIO_PIN_RESET);
-}
-
 
 
 /* USER CODE END 4 */

@@ -15,6 +15,9 @@ public:
 	virtual void SendPacket(const PacketHeader& header, Buffer& packet);
 	virtual void RecievePacket(const PacketHeader& header, Buffer& packet);
 
+	//Sends a command to the GPS after adding the $ character at the beginning and adding the calculated checksum at the end
+	void NMEASend(const char* command);
+
 	virtual ~GPS() {}
 
 private:
