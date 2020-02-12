@@ -63,14 +63,14 @@ namespace StatusValue {
 
 }
 
-using DebugLevelType = uint8_t;
+using LogLevelType = uint8_t;
 
-namespace DebugLevel {
+namespace LogLevel {
 
-	constexpr DebugLevelType TRACE = 0;
-	constexpr DebugLevelType INFO = 1;
-	constexpr DebugLevelType WARN = 2;
-	constexpr DebugLevelType ERROR = 3;
+	constexpr LogLevelType TRACE = 0;
+	constexpr LogLevelType INFO = 1;
+	constexpr LogLevelType WARN = 2;
+	constexpr LogLevelType ERROR = 3;
 
 }
 
@@ -90,38 +90,49 @@ struct PacketHeader
 };
 
 
-
-Formatter BeginMessage(const char* device, const char* level);
+Formatter BeginMessage(const char* device, LogLevelType level);
 
 //Implemented by each parent-module
 void SerialPrint(Formatter& formatter);
 const char* GetParentModuleName();
 
-class SLICoreModule;
 
+class SLILogable
+{
+public:
+	virtual ModuleID GetID() const = 0;
+
+	virtual ~SLILogable() {}
+
+protected:
+	inline Formatter BeginDeviceMessage(LogLevelType level) { return BeginMessage(GetModuleIDName(GetID()), level); }
+	void SendDebugMessage(Formatter& formatter);
+
+	void Trace(const char* message);
+	void Info(const char* message);
+	void Warn(const char* message);
+	void Error(const char* message);
+};
+
+class SLICoreModule;
 
 //An SLI module represents a sensor or processor that can send and receive packets
 //Eg. the radio, GPS, altimeter, etc
-class SLIModule
+class SLIModule : public SLILogable
 {
 public:
 	SLIModule(SLICoreModule* core, ModuleID moduleID) : m_CoreModule(core), m_ModuleID(moduleID) {}
 
 	virtual void Init() = 0;
 	virtual void Update() = 0;
-	virtual void SendPacket(const PacketHeader& header, Buffer& packet);
 	virtual void RecievePacket(const PacketHeader& header, Buffer& packet) = 0;
-	inline ModuleID GetID() const { return m_ModuleID; }
+	virtual inline ModuleID GetID() const { return m_ModuleID; }
+
 	inline int32_t GetIntID() const { return static_cast<int32_t>(m_ModuleID); }
+	void SendPacket(const PacketHeader& header, Buffer& packet);
 	void Log(const char* message);
 
 	virtual ~SLIModule() {}
-
-
-protected:
-	inline void Info(const char* message)  const { LogInfo(GetID(), message); }
-	inline void Warn(const char* message)  const { LogInfo(GetID(), message); }
-	inline void Error(const char* message) const { LogInfo(GetID(), message); }
 
 
 private:
@@ -134,7 +145,7 @@ private:
 
 //A core module represents a module that can physically send and receive packets
 //Eg. the ground station, the STM32F103, and the STM32F205
-class SLICoreModule
+class SLICoreModule : public SLILogable
 {
 public:
 	SLICoreModule(ModuleID self);
@@ -153,14 +164,12 @@ public:
 	bool HasModule(ModuleID id);
 	void AddModule(SLIModule* module);
 
-	ModuleID GetID() const { return m_ModuleID; }
+	virtual ModuleID GetID() const { return m_ModuleID; }
 
 
 	virtual ~SLICoreModule() {}
 
-	inline void Info(const char* message)  const { LogInfo(GetID(), message); }
-	inline void Warn(const char* message)  const { LogInfo(GetID(), message); }
-	inline void Error(const char* message) const { LogInfo(GetID(), message); }
+	inline Formatter BeginDeviceMessage(LogLevelType level) { return BeginMessage(GetModuleIDName(m_ModuleID), level); }
 
 protected:
 	void UpdateLocalModules();

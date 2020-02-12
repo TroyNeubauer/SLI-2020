@@ -116,13 +116,14 @@ public:
     //   are available to be "read" from the fix buffer.  The GPS port
     //   object is passed in so a char can be read if port.available().
 
-/*    uint8_t available( Stream & port )
-      {
-        if (processing_style == PS_POLLING)
-          while (port.available())
-            handle( port.read() );
+    uint8_t handle(const uint8_t* buf, uint32_t size)
+    {
+        for (unsigned int i = 0; i < size; i++)
+        {
+            handle(buf[i]);
+        }
         return _available();
-      }*/
+    }
     uint8_t available() const volatile { return _available(); };
 
     //.......................................................................

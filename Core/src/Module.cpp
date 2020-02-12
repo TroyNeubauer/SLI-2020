@@ -86,51 +86,76 @@ uint16_t SizeOfPacket(const PacketHeader& header, Buffer& packet)
 
 void SLICoreModule::AddModule(SLIModule* module)
 {
-	if (m_ContainedModules[module->GetIntID()] != nullptr)
+	SLI_FASSERT(m_ContainedModules[module->GetIntID()] == nullptr, f << "Module already exists! " << GetModuleIDName(module->GetID()));
+	m_ContainedModules[module->GetIntID()] = module;
+	Formatter formatter = BeginDeviceMessage(LogLevel::INFO);
+	formatter << "Added module! ID " << module->GetIntID();
+	SendDebugMessage(formatter);
+	module->Init();
+
+}
+
+
+Formatter BeginMessage(const char* device, LogLevelType level)
+{
+	SizedFormatter<256> result;
+	result << '[';
+	result << device;
+	if (level != LogLevel::TRACE)
 	{
-		SizedFormatter<64> formatter;
-		formatter << "Module already exists! ID " << module->GetIntID();
-		Error(formatter.c_str());
+		result << ' ';
+		if (level == LogLevel::INFO)
+			result << "info";
+		else if (level == LogLevel::WARN)
+			result << "Warn";
+		else if (level == LogLevel::ERROR)
+			result << "ERROR";
+		else
+			result << "Unknown level";
 	}
-	else
-	{
-		m_ContainedModules[module->GetIntID()] = module;
-		SizedFormatter<64> formatter;
-		formatter << "Added module! ID " << module->GetIntID();
-		Info(formatter.c_str());
-		module->Init();
-	}
-}
 
-void Formatter BeginInfoMessage()
-{
-	Formatter result;
-	result << '[';
-	result << GetParentModuleName();
-	result << ' ';
-	result << " info]: ";
+	result << "]: ";
 	return result;
 }
 
-void Formatter BeginWarnMessage()
+
+void SLILogable::SendDebugMessage(Formatter& formatter)
 {
-	Formatter result;
-	result << '[';
-	result << GetParentModuleName();
-	result << ' ';
-	result << " Warn]: ";
-	return result;
+	SerialPrint(formatter);
 }
 
-void Formatter BeginErrorMessage()
+
+void SLILogable::Trace(const char* message)
 {
-	Formatter result;
-	result << '[';
-	result << GetParentModuleName();
-	result << ' ';
-	result << " ERROR]: ";
-	return result;
+	Formatter formatter = BeginDeviceMessage(LogLevel::TRACE);
+	formatter << message;
+	SendDebugMessage(formatter);
 }
+
+void SLILogable::Info(const char* message)
+{
+	Formatter formatter = BeginDeviceMessage(LogLevel::INFO);
+	formatter << message;
+	SendDebugMessage(formatter);
+
+}
+
+void SLILogable::Warn(const char* message)
+{
+	Formatter formatter = BeginDeviceMessage(LogLevel::WARN);
+	formatter << message;
+	SendDebugMessage(formatter);
+
+}
+
+void SLILogable::Error(const char* message)
+{
+	Formatter formatter = BeginDeviceMessage(LogLevel::ERROR);
+	formatter << message;
+	SendDebugMessage(formatter);
+
+}
+
 
 
 const char* GetModuleIDName(ModuleID id)

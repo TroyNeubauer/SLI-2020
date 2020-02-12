@@ -7,21 +7,21 @@ if(len(sys.argv) < 3):
 	print('python master-flash [s/c] [d/r]')
 	exit()
 
-chipid = ''
-
-if(sys.argv[1] == 'c'):
-	chipid = b'0x0410'
-	print('Writing to the STM32F103')
-elif(sys.argv[1] == 's'):
-	chipid = b'0x0411'
-	print('Writing to the STM32F205')
-else:
-	print('Invalid Arguments')
-
 def dots_print(s):
 	for i in range(4):
 		print(s + ' ' + ('.' * i) + (' ' * (4 - i)), end='\r')
 		time.sleep(0.1)
+
+chipid = ''
+
+if(sys.argv[1] == 'c'):
+	chipid = b'0x0410'
+	dots_print('Writing to the STM32F103')
+elif(sys.argv[1] == 's'):
+	chipid = b'0x0411'
+	dots_print('Writing to the STM32F205')
+else:
+	print('Invalid Arguments')
 
 while(chipid not in subprocess.check_output(['st-info','--probe'])):
 	dots_print('Waiting for Chip ID')

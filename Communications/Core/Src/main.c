@@ -91,7 +91,7 @@ static void MX_USART2_UART_Init(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-
+  CLog("Communications board starting...");
   /* USER CODE END 1 */
   
 
@@ -101,6 +101,7 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
+  CLog("HAL Init complete");
   initStage = INIT_STAGE_HAL;
   /* USER CODE END Init */
 
@@ -108,6 +109,7 @@ int main(void)
   SystemClock_Config();
 
   /* USER CODE BEGIN SysInit */
+  CLog("System clock config complete");
   initStage = INIT_STAGE_SYSTEM_CLOCK;
   /* USER CODE END SysInit */
 
@@ -118,14 +120,15 @@ int main(void)
   MX_SPI1_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
+  CLog("Peripheral initialization complete");
   initStage = INIT_STAGE_PERHIPERALS;
-  Log("SystemInit complete!");
   /* USER CODE END 2 */
  
  
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  CLog("Invoking C++ code");
   InvokeCpp(&hspi1, RADIO_UART, GPS_UART);
   while (1)
   {
@@ -337,18 +340,18 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
 
+  /*Configure GPIO pins : PA0 PA8 */
+  GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_8;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
   /*Configure GPIO pins : PB12 PB13 PB5 */
   GPIO_InitStruct.Pin = GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_5;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-
-  /*Configure GPIO pin : PA8 */
-  GPIO_InitStruct.Pin = GPIO_PIN_8;
-  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
   /*Configure peripheral I/O remapping */
   __HAL_AFIO_REMAP_PD01_ENABLE();
@@ -357,6 +360,34 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 
+
+void My_Error_Handler(void)
+{
+  /* USER CODE BEGIN Error_Handler_Debug */
+  /* User can add his own implementation to report the HAL error return state */
+  while (1)
+  {
+	const int flashCount = 5;
+	const int onTime = 40, offTime = 200;
+	//How often to show the flashes
+	const int cycleTime = 2000;
+	const int waitTime = cycleTime - (flashCount * onTime + flashCount * offTime);
+
+	for (int i = 0; i < flashCount; i++)
+	{
+		HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_SET);
+		HAL_Delay(onTime);
+		HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_RESET);
+		HAL_Delay(offTime);
+	}
+	if (waitTime > 0)
+	{
+		HAL_Delay(waitTime);
+	}
+
+  }
+  /* USER CODE END Error_Handler_Debug */
+}
 
 /* USER CODE END 4 */
 
@@ -370,10 +401,10 @@ void Error_Handler(void)
   /* User can add his own implementation to report the HAL error return state */
   while (1)
   {
-	const int flashCount = 3;
-	const int onTime = 25, offTime = 95;
+	const int flashCount = 5;
+	const int onTime = 40, offTime = 200;
 	//How often to show the flashes
-	const int cycleTime = 1000;
+	const int cycleTime = 2000;
 	const int waitTime = cycleTime - (flashCount * onTime + flashCount * offTime);
 
 	for (int i = 0; i < flashCount; i++)

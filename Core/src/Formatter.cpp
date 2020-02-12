@@ -1,4 +1,5 @@
 #include "Formatter.h"
+#include "Core.h"
 
 const char Formatter::UPPER_DIGITS[16] = { '0', '1', '2', '3', '4', '5', '6',
 		'7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
@@ -66,10 +67,8 @@ Formatter& Formatter::operator<<(int64_t value) {
 Formatter& Formatter::operator<<(float value) {
 	int count = std::snprintf(m_Buf + m_Offset, m_Capacity - m_Offset, "%f",
 			value);
-	if (count <= 0) {
-		//FIXME
-	} else
-		m_Offset += count;
+	SLI_ASSERT(count > 0, "Failed to snprintf float");
+	m_Offset += count;
 
 	return *this;
 }
