@@ -1,17 +1,19 @@
 #include "Modules/GPS.h"
 #include "Formatter.h"
 
+#include "Modules/CommunicationsBoard.h"
+
 #include "stm32f1xx.h"
 #include "stm32f1xx_hal.h"
 
 //The max NMEA sentence length should be 82 but we need to verify this
-uint8_t gpsBuf[96];
+uint8_t gpsBuf[128];
 
 void GPS::Init()
 {
-	Info("GPS::Init");
+	Trace("GPS::Init");
 	NMEASend("PMTK251,115200");
-	Info("Sent GPS baud rate change command");
+	Trace("Sent GPS baud rate change command");
 
 	HAL_UART_DeInit(m_GPSUART);
 
@@ -22,27 +24,65 @@ void GPS::Init()
 	}
 	else
 	{
-		Info("Successfully changed GPSbaud rate to 115200 b/s");
+		Info("Successfully changed GPS baud rate to 115200 b/s");
 	}
 
 	NMEASend("PMTK220,100");
-	Info("Sent GPS to 10Hz");
+	Info("Set GPS to 10Hz");
 
 	NMEASend("PMTK314,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0");
 }
 
+uint32_t startTicks;
+
+
+void transferComplete(__UART_HandleTypeDef * def)
+{
+	SizedFormatter<64> formatter;
+	formatter << "TRANSFER COMPLETE Took: " << (HAL_GetTick() - startTicks) << "ms | ";
+	bool fix = HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_15) == GPIO_PIN_SET;
+	formatter << "Has fix: " << fix << '\n' << reinterpret_cast<const char*>(gpsBuf);
+	CommunicationsBoard::GetInstance().GetModule(ModuleID::GPS)->Info(formatter.c_str());
+
+}
+
+void transferHalfComplete(__UART_HandleTypeDef * def)
+{
+	CommunicationsBoard::GetInstance().GetModule(ModuleID::GPS)->Info("Half complete");
+}
+
+void transferError(__UART_HandleTypeDef * def)
+{
+	CommunicationsBoard::GetInstance().GetModule(ModuleID::GPS)->Info("Transfer error");
+}
+
+void transferAbort(__UART_HandleTypeDef * def)
+{
+	CommunicationsBoard::GetInstance().GetModule(ModuleID::GPS)->Info("Transfer Abort");
+}
+
+
 void GPS::Update()
 {
-	Info("Called GPS::Update");
-	uint32_t startTicks = HAL_GetTick();
-	HAL_UART_Receive(m_GPSUART, (uint8_t*) gpsBuf, sizeof(gpsBuf), HAL_MAX_DELAY);
+	if (m_GPSUART->RxState == HAL_UART_STATE_READY)
+	{
+		Info("Starting GPS transfer");
+		startTicks = HAL_GetTick();
+		m_GPSUART->RxHalfCpltCallback = transferHalfComplete;
+		m_GPSUART->AbortReceiveCpltCallback = transferAbort;
+		m_GPSUART->RxCpltCallback = transferComplete;
 
+		Info("Calling HAL_UART_Receive_DMA");
+		HAL_UART_Receive_DMA(m_GPSUART, gpsBuf, sizeof(gpsBuf));
+		Info("doing __HAL_UART_ENABLE_IT");
+		__HAL_UART_ENABLE_IT(m_GPSUART, UART_IT_IDLE);
+		Info("done");
 
-	SizedFormatter<64> formatter;
-	formatter << "Read GPS! Took: " << (HAL_GetTick() - startTicks) << "ms | ";
-	bool fix = HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_15) == GPIO_PIN_SET;
-	formatter << "Has fix: " << fix << '\n';
-	Info(formatter.c_str());
+	}
+	else
+	{
+		Info("...");
+	}
 
 }
 

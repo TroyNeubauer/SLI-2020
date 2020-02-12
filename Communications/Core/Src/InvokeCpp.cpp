@@ -54,6 +54,7 @@ extern "C"
 				HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_12);
 				last = HAL_GetTick();
 			}
+			HAL_Delay(20);
 
 		}
 	}
@@ -92,7 +93,7 @@ void SLIAssertFailed(const char* message)
 	SizedFormatter<256> formatter;
 	formatter << "ASSERTION FAILED!!\n" << message;
 	SerialPrint(formatter);
-
+	My_Error_Handler();
 }
 
 const char* GetParentModuleName()

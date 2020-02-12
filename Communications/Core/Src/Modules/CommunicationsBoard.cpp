@@ -2,6 +2,22 @@
 
 #include "stm32f1xx_hal_uart.h"
 
+static CommunicationsBoard* s_Instance = nullptr;
+
+
+CommunicationsBoard& CommunicationsBoard::GetInstance()
+{
+	SLI_ASSERT(s_Instance, "Cannot call CommunicationsBoard::GetInstance when instance is null!");
+
+	return *s_Instance;
+}
+
+CommunicationsBoard::CommunicationsBoard(SPI_HandleTypeDef* spi1, UART_HandleTypeDef* radioUART, UART_HandleTypeDef* GPSUART)
+	: SLICoreModule(ModuleID::STM32F103), m_SPI1(spi1), m_RadioUART(radioUART), m_GPSUART(GPSUART)
+{
+	s_Instance = this;
+}
+
 
 void CommunicationsBoard::Init()
 {

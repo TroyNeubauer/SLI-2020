@@ -95,6 +95,15 @@ void SLICoreModule::AddModule(SLIModule* module)
 
 }
 
+SLIModule* SLICoreModule::GetModule(ModuleID id)
+{
+	int intId = static_cast<int>(id);
+	SLI_FASSERT(m_ContainedModules[intId], f << "Module " << GetModuleIDName(id) << "Doesnt exist on board!");
+
+	return m_ContainedModules[intId];
+}
+
+
 
 Formatter BeginMessage(const char* device, LogLevelType level)
 {

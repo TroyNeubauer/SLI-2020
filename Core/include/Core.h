@@ -1,6 +1,6 @@
 
 #include "Formatter.h"
-
+#if defined(RKT_DEBUG)
 extern void SLIAssertFailed(const char* message);
 #define SLI_ASSERT(value, message) { if(!(value)) { SLIAssertFailed(message); }}
 
@@ -14,3 +14,10 @@ extern void SLIAssertFailed(const char* message);
 	}												\
 }													\
 
+#else
+
+#define SLI_ASSERT(value, message)
+
+#define SLI_FASSERT(value, formatterCode)
+
+#endif

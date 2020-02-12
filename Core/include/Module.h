@@ -104,7 +104,6 @@ public:
 
 	virtual ~SLILogable() {}
 
-protected:
 	inline Formatter BeginDeviceMessage(LogLevelType level) { return BeginMessage(GetModuleIDName(GetID()), level); }
 	void SendDebugMessage(Formatter& formatter);
 
@@ -163,6 +162,7 @@ public:
 	//Returns true if this module is directly connected to this device
 	bool HasModule(ModuleID id);
 	void AddModule(SLIModule* module);
+	SLIModule* GetModule(ModuleID id);
 
 	virtual ModuleID GetID() const { return m_ModuleID; }
 
