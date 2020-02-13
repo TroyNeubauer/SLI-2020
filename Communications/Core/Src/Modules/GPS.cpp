@@ -36,7 +36,7 @@ void GPS::Init()
 uint32_t startTicks;
 
 
-void transferComplete(__UART_HandleTypeDef * def)
+void transferComplete(UART_HandleTypeDef * def)
 {
 	SizedFormatter<64> formatter;
 	formatter << "TRANSFER COMPLETE Took: " << (HAL_GetTick() - startTicks) << "ms | ";
@@ -46,17 +46,17 @@ void transferComplete(__UART_HandleTypeDef * def)
 
 }
 
-void transferHalfComplete(__UART_HandleTypeDef * def)
+void transferHalfComplete(UART_HandleTypeDef * def)
 {
 	CommunicationsBoard::GetInstance().GetModule(ModuleID::GPS)->Info("Half complete");
 }
 
-void transferError(__UART_HandleTypeDef * def)
+void transferError(UART_HandleTypeDef * def)
 {
 	CommunicationsBoard::GetInstance().GetModule(ModuleID::GPS)->Info("Transfer error");
 }
 
-void transferAbort(__UART_HandleTypeDef * def)
+void transferAbort(UART_HandleTypeDef * def)
 {
 	CommunicationsBoard::GetInstance().GetModule(ModuleID::GPS)->Info("Transfer Abort");
 }
