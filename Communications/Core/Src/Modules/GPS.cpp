@@ -66,6 +66,8 @@ void GPS::Update()
 {
 	if (m_GPSUART->RxState == HAL_UART_STATE_READY)
 	{
+		Info("Calling HAL_UART_IRQHandler");
+		HAL_UART_IRQHandler(m_GPSUART);
 		Info("Starting GPS transfer");
 		startTicks = HAL_GetTick();
 		m_GPSUART->RxHalfCpltCallback = transferHalfComplete;
