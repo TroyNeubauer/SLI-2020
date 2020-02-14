@@ -24,6 +24,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
+#include <string.h>
 
 #include "InvokeCpp.h"
 
@@ -81,7 +82,7 @@ static void MX_USART2_UART_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
+uint8_t receive_buff[128];
 /* USER CODE END 0 */
 
 /**
@@ -128,13 +129,17 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  CLog("Invoking C++ code");
-  InvokeCpp(&hspi1, RADIO_UART, GPS_UART);
+  //CLog("Invoking C++ code");
+  //InvokeCpp(&hspi1, RADIO_UART, GPS_UART);
+  __HAL_UART_ENABLE_IT(GPS_UART, UART_IT_IDLE);
+
   while (1)
   {
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+	__HAL_UART_ENABLE_IT(GPS_UART, UART_IT_IDLE);
+	HAL_UART_Receive_DMA(GPS_UART, receive_buff, sizeof(receive_buff));
   }
   /* USER CODE END 3 */
 }
@@ -361,6 +366,39 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+
+void SerialPrint(const char* message)
+{
+	HAL_UART_Transmit(RADIO_UART, message, strlen(message), HAL_MAX_DELAY);
+}
+
+void USER_UART_IRQHandler(UART_HandleTypeDef *huart)
+{
+	SerialPrint("Handler called");
+	if (huart == GPS_UART)
+	{
+		if (RESET != __HAL_UART_GET_FLAG(GPS_UART, UART_FLAG_IDLE))
+		{
+			__HAL_UART_CLEAR_IDLEFLAG(GPS_UART);
+
+			//Stop this DMA transmission
+		    HAL_UART_DMAStop(GPS_UART);
+
+		    char temp[128];
+
+		    //Calculate the length of the received data
+		    uint8_t counterIs  = __HAL_DMA_GET_COUNTER(&hdma_usart1_rx);
+
+			//Test function: Print out the received data
+		    snprintf(temp, sizeof(temp), "Receive Data(counterIs = %d): \n", counterIs);
+		    SerialPrint(temp);
+		    //HAL_UART_Transmit(&huart1,receive_buff, data_length,0x200);
+
+		    HAL_UART_Receive_DMA(GPS_UART, receive_buff, sizeof(receive_buff));
+		}
+	}
+}
+
 
 
 void My_Error_Handler(void)

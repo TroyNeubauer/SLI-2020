@@ -100,4 +100,3 @@ const char* GetParentModuleName()
 {
 	return "stmF103";
 }
-

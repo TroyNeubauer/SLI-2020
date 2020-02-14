@@ -9,6 +9,39 @@
 //The max NMEA sentence length should be 82 but we need to verify this
 uint8_t gpsBuf[128];
 
+uint8_t temp;
+uint8_t lastTemp = 0;
+
+uint32_t lastTicks;
+
+uint32_t gpsIndex;
+
+void transferComplete(UART_HandleTypeDef* def)
+{
+	gpsBuf[gpsIndex++] = temp;
+	if (gpsIndex >= sizeof(gpsBuf)) gpsIndex = 0;
+
+	lastTemp = temp;
+	HAL_UART_Receive_IT(def, &temp, 1);
+
+	SizedFormatter<128> formatter;
+	formatter << "index " << gpsIndex << ", char " << (char) temp;
+	if (lastTemp == '\r' && temp == '\n')
+	{
+		formatter << "\nEND OF SEQUENCE!!!";
+	}
+
+	CommunicationsBoard::GetInstance().GetModule(ModuleID::GPS)->Info(formatter.c_str());
+
+
+
+}
+
+void transferError(UART_HandleTypeDef* def)
+{
+
+}
+
 void GPS::Init()
 {
 	Trace("GPS::Init");
@@ -16,6 +49,7 @@ void GPS::Init()
 	Trace("Sent GPS baud rate change command");
 
 	HAL_UART_DeInit(m_GPSUART);
+	HAL_Delay(1);
 
 	m_GPSUART->Init.BaudRate = 115200;
 	if (HAL_UART_Init(m_GPSUART) != HAL_OK)
@@ -26,50 +60,23 @@ void GPS::Init()
 	{
 		Info("Successfully changed GPS baud rate to 115200 b/s");
 	}
+	HAL_Delay(1);
 
-	NMEASend("PMTK220,100");
-	Info("Set GPS to 10Hz");
+	//NMEASend("PMTK220,100");
+	//Info("Set GPS to 10Hz");
 
 	NMEASend("PMTK314,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0");
+
+	lastTicks = HAL_GetTick();
+	m_GPSUART->RxCpltCallback = transferComplete;
+	HAL_UART_Receive_IT(m_GPSUART, &temp, 1);
 }
 
-uint32_t startTicks;
-
-
-uint32_t gpsIndex;
-
-void transferComplete(UART_HandleTypeDef* def)
-{
-	SizedFormatter<128> formatter;
-	formatter << "index " << gpsIndex;
-
-	CommunicationsBoard::GetInstance().GetModule(ModuleID::GPS)->Info(formatter.c_str());
-
-	gpsIndex++;
-
-}
-
-void transferError(UART_HandleTypeDef* def)
-{
-
-}
 
 
 void GPS::Update()
 {
-	if (m_GPSUART->RxState == HAL_UART_STATE_READY)
-	{
 
-		startTicks = HAL_GetTick();
-		m_GPSUART->RxCpltCallback = transferComplete;
-
-		Info("Calling HAL_UART_Receive_IT");
-		gpsIndex = 0;
-
-		HAL_UART_Receive_IT(m_GPSUART, gpsBuf, sizeof(gpsBuf));
-
-
-	}
 }
 
 void GPS::RecievePacket(const PacketHeader &header, Buffer &packet)
