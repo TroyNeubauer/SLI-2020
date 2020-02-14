@@ -36,29 +36,22 @@ void GPS::Init()
 uint32_t startTicks;
 
 
-void transferComplete(UART_HandleTypeDef * def)
+uint32_t gpsIndex;
+
+void transferComplete(UART_HandleTypeDef* def)
 {
-	SizedFormatter<64> formatter;
-	formatter << "TRANSFER COMPLETE Took: " << (HAL_GetTick() - startTicks) << "ms | ";
-	bool fix = HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_15) == GPIO_PIN_SET;
-	formatter << "Has fix: " << fix << '\n' << reinterpret_cast<const char*>(gpsBuf);
+	SizedFormatter<128> formatter;
+	formatter << "index " << gpsIndex;
+
 	CommunicationsBoard::GetInstance().GetModule(ModuleID::GPS)->Info(formatter.c_str());
 
+	gpsIndex++;
+
 }
 
-void transferHalfComplete(UART_HandleTypeDef * def)
+void transferError(UART_HandleTypeDef* def)
 {
-	CommunicationsBoard::GetInstance().GetModule(ModuleID::GPS)->Info("Half complete");
-}
 
-void transferError(UART_HandleTypeDef * def)
-{
-	CommunicationsBoard::GetInstance().GetModule(ModuleID::GPS)->Info("Transfer error");
-}
-
-void transferAbort(UART_HandleTypeDef * def)
-{
-	CommunicationsBoard::GetInstance().GetModule(ModuleID::GPS)->Info("Transfer Abort");
 }
 
 
@@ -66,26 +59,17 @@ void GPS::Update()
 {
 	if (m_GPSUART->RxState == HAL_UART_STATE_READY)
 	{
-		Info("Calling HAL_UART_IRQHandler");
-		HAL_UART_IRQHandler(m_GPSUART);
-		Info("Starting GPS transfer");
+
 		startTicks = HAL_GetTick();
-		m_GPSUART->RxHalfCpltCallback = transferHalfComplete;
-		m_GPSUART->AbortReceiveCpltCallback = transferAbort;
 		m_GPSUART->RxCpltCallback = transferComplete;
 
-		Info("Calling HAL_UART_Receive_DMA");
-		HAL_UART_Receive_DMA(m_GPSUART, gpsBuf, sizeof(gpsBuf));
-		Info("doing __HAL_UART_ENABLE_IT");
-		__HAL_UART_ENABLE_IT(m_GPSUART, UART_IT_IDLE);
-		Info("done");
+		Info("Calling HAL_UART_Receive_IT");
+		gpsIndex = 0;
+
+		HAL_UART_Receive_IT(m_GPSUART, gpsBuf, sizeof(gpsBuf));
+
 
 	}
-	else
-	{
-		Info("...");
-	}
-
 }
 
 void GPS::RecievePacket(const PacketHeader &header, Buffer &packet)
