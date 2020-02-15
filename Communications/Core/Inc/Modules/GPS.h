@@ -7,7 +7,7 @@ class GPS : public SLIModule
 {
 public:
 
-	GPS(SLICoreModule* core, UART_HandleTypeDef* gps) : SLIModule(core, ModuleID::GPS), m_GPSUART(gps) {}
+	GPS(SLICoreModule* core, USART_TypeDef* gps) : SLIModule(core, ModuleID::GPS), m_GPSUART(gps) {}
 	virtual void Init();
 	virtual void Update();
 	virtual void RecievePacket(const PacketHeader& header, Buffer& packet);
@@ -21,7 +21,7 @@ public:
 
 
 private:
-	UART_HandleTypeDef* m_GPSUART;
+	USART_TypeDef* m_GPSUART;
 
 };
 

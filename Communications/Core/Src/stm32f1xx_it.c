@@ -184,7 +184,7 @@ void SysTick_Handler(void)
   /* USER CODE BEGIN SysTick_IRQn 0 */
 
   /* USER CODE END SysTick_IRQn 0 */
-  
+  HAL_IncTick();
   /* USER CODE BEGIN SysTick_IRQn 1 */
 
   /* USER CODE END SysTick_IRQn 1 */
@@ -198,20 +198,6 @@ void SysTick_Handler(void)
 /******************************************************************************/
 
 /**
-  * @brief This function handles DMA1 channel4 global interrupt.
-  */
-void DMA1_Channel4_IRQHandler(void)
-{
-  /* USER CODE BEGIN DMA1_Channel4_IRQn 0 */
-
-  /* USER CODE END DMA1_Channel4_IRQn 0 */
-  
-  /* USER CODE BEGIN DMA1_Channel4_IRQn 1 */
-
-  /* USER CODE END DMA1_Channel4_IRQn 1 */
-}
-
-/**
   * @brief This function handles DMA1 channel5 global interrupt.
   */
 void DMA1_Channel5_IRQHandler(void)
@@ -223,34 +209,6 @@ void DMA1_Channel5_IRQHandler(void)
   /* USER CODE BEGIN DMA1_Channel5_IRQn 1 */
 
   /* USER CODE END DMA1_Channel5_IRQn 1 */
-}
-
-/**
-  * @brief This function handles DMA1 channel6 global interrupt.
-  */
-void DMA1_Channel6_IRQHandler(void)
-{
-  /* USER CODE BEGIN DMA1_Channel6_IRQn 0 */
-
-  /* USER CODE END DMA1_Channel6_IRQn 0 */
-  
-  /* USER CODE BEGIN DMA1_Channel6_IRQn 1 */
-
-  /* USER CODE END DMA1_Channel6_IRQn 1 */
-}
-
-/**
-  * @brief This function handles DMA1 channel7 global interrupt.
-  */
-void DMA1_Channel7_IRQHandler(void)
-{
-  /* USER CODE BEGIN DMA1_Channel7_IRQn 0 */
-
-  /* USER CODE END DMA1_Channel7_IRQn 0 */
-  
-  /* USER CODE BEGIN DMA1_Channel7_IRQn 1 */
-
-  /* USER CODE END DMA1_Channel7_IRQn 1 */
 }
 
 /**

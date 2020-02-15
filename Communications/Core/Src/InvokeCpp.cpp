@@ -1,9 +1,8 @@
 
 //#include "CommunicationsBoard.h"
 
-#include "stm32f1xx_hal.h"
-#include "stm32f1xx_hal_gpio.h"
 #include "stm32f1xx.h"
+#include "stm32f1xx_ll_usart.h"
 
 #include <cstdlib>
 #include <cstdio>
@@ -18,9 +17,8 @@
 
 CommunicationsBoard* boardPtr = nullptr;
 
-SPI_HandleTypeDef* s_SPI1 = nullptr;
-UART_HandleTypeDef* s_RadioUart = nullptr;
-UART_HandleTypeDef* s_GPSUart = nullptr;
+USART_TypeDef* s_RadioUart = nullptr;
+USART_TypeDef* s_GPSUart = nullptr;
 
 void SerialPrint(Formatter& formatter);
 
@@ -30,15 +28,14 @@ extern "C"
 {
 	SizedFormatter<256> cLog;
 
-	void InvokeCpp(SPI_HandleTypeDef* spi1, UART_HandleTypeDef* radioUart, UART_HandleTypeDef* GPSUart)
+	void InvokeCpp(USART_TypeDef* radioUart, USART_TypeDef* GPSUart)
 	{
 		int last = HAL_GetTick();
-		s_SPI1 = spi1;
 		s_RadioUart = radioUart;
 		s_GPSUart = GPSUart;
 		SerialPrint(cLog);
 
-		CommunicationsBoard board(spi1, radioUart, GPSUart);
+		CommunicationsBoard board(radioUart, GPSUart);
 		boardPtr = &board;
 		board.Init();
 
@@ -54,7 +51,8 @@ extern "C"
 				HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_12);
 				last = HAL_GetTick();
 			}
-			HAL_Delay(20);
+			board.Info("...");
+			HAL_Delay(200);
 
 		}
 	}
@@ -68,24 +66,17 @@ extern "C"
 
 }
 
-template<typename T>
-uint8_t* ToDumbType(const T* ptr)
-{
-	return reinterpret_cast<uint8_t*>(const_cast<T*>(ptr));
-}
-
 void SerialPrint(Formatter& formatter)
 {
 	if (s_RadioUart == nullptr)
 	{
 		My_Error_Handler();
 	}
-	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_13, GPIO_PIN_SET);
 
 	formatter << '\n';
-	HAL_UART_Transmit(s_RadioUart, ToDumbType(formatter.Data()), formatter.Size(), HAL_MAX_DELAY);
 
-	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_13, GPIO_PIN_RESET);
+	SerialPrintImpl(formatter.Data(), formatter.Size());
+
 }
 
 void SLIAssertFailed(const char* message)

@@ -17,17 +17,24 @@ void GPS::Init()
 	NMEASend("PMTK251,115200");
 	Trace("Sent GPS baud rate change command");
 
-	HAL_UART_DeInit(m_GPSUART);
-	HAL_Delay(1);
+	LL_USART_DeInit(m_GPSUART);
 
-	m_GPSUART->Init.BaudRate = 115200;
-	if (HAL_UART_Init(m_GPSUART) != HAL_OK)
-	{
-		Error("Failed to change GPS baud rate to 115200 b/s!");
-	} else
-	{
-		Info("Successfully changed GPS baud rate to 115200 b/s");
-	}
+	LL_USART_InitTypeDef USART_InitStruct =
+	{ 0 };
+
+	LL_USART_Disable(USART1);
+	USART_InitStruct.BaudRate = 115200;
+	USART_InitStruct.DataWidth = LL_USART_DATAWIDTH_8B;
+	USART_InitStruct.StopBits = LL_USART_STOPBITS_1;
+	USART_InitStruct.Parity = LL_USART_PARITY_NONE;
+	USART_InitStruct.TransferDirection = LL_USART_DIRECTION_TX_RX;
+	USART_InitStruct.HardwareFlowControl = LL_USART_HWCONTROL_NONE;
+	USART_InitStruct.OverSampling = LL_USART_OVERSAMPLING_16;
+	LL_USART_Init(USART1, &USART_InitStruct);
+	LL_USART_Enable(USART1);
+
+	Info("Changed GPS baud rate to 115200 b/s");
+
 	HAL_Delay(1);
 
 	//NMEASend("PMTK220,100");
@@ -38,21 +45,8 @@ void GPS::Init()
 
 uint32_t startTicks;
 
-
 void GPS::Update()
 {
-	if (HAL_UART_GetState(m_GPSUART) == HAL_UART_STATE_READY)
-	{
-		Info("Calling HAL_UART_Receive_DMA");
-		HAL_UART_Receive_DMA(m_GPSUART, gpsBuf, sizeof(gpsBuf));
-		Info("doing __HAL_UART_ENABLE_IT");
-		__HAL_UART_ENABLE_IT(m_GPSUART, UART_IT_IDLE);
-		Info("done");
-	}
-	else
-	{
-		Info("...");
-	}
 
 }
 
@@ -83,7 +77,7 @@ void GPS::NMEASend(const char *command)
 	SLI_ASSERT(chars < (int ) sizeof(buf), "NMEASend buffer overflow");
 	Info("Sending command to GPS:");
 	Info(buf);
-	HAL_UART_Transmit(m_GPSUART, reinterpret_cast<uint8_t*>(buf), chars, HAL_MAX_DELAY);
+//	HAL_UART_Transmit(m_GPSUART, reinterpret_cast<uint8_t*>(buf), chars, HAL_MAX_DELAY);
 
 }
 
