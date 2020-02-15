@@ -18,7 +18,7 @@ public:
 
 	virtual ~GPS() {}
 
-	void HandleLine(const char* buf, uint32_t size);
+	void IRQHandler();
 
 
 private:
