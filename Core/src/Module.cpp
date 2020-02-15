@@ -137,14 +137,14 @@ void SLILogable::SendDebugMessage(Formatter& formatter)
 void SLILogable::Trace(const char* message)
 {
 	Formatter formatter = BeginDeviceMessage(LogLevel::TRACE);
-	formatter << message;
+	formatter << message << '\n';
 	SendDebugMessage(formatter);
 }
 
 void SLILogable::Info(const char* message)
 {
 	Formatter formatter = BeginDeviceMessage(LogLevel::INFO);
-	formatter << message;
+	formatter << message << '\n';
 	SendDebugMessage(formatter);
 
 }
@@ -152,7 +152,7 @@ void SLILogable::Info(const char* message)
 void SLILogable::Warn(const char* message)
 {
 	Formatter formatter = BeginDeviceMessage(LogLevel::WARN);
-	formatter << message;
+	formatter << message << '\n';
 	SendDebugMessage(formatter);
 
 }
@@ -160,11 +160,9 @@ void SLILogable::Warn(const char* message)
 void SLILogable::Error(const char* message)
 {
 	Formatter formatter = BeginDeviceMessage(LogLevel::ERROR);
-	formatter << message;
+	formatter << message << '\n';
 	SendDebugMessage(formatter);
-
 }
-
 
 
 const char* GetModuleIDName(ModuleID id)

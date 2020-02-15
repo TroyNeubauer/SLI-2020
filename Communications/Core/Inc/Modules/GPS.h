@@ -18,6 +18,9 @@ public:
 
 	virtual ~GPS() {}
 
+	void HandleLine(const char* buf, uint32_t size);
+
+
 private:
 	UART_HandleTypeDef* m_GPSUART;
 
