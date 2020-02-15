@@ -56,6 +56,7 @@ void Error_Handler(void);
 /* USER CODE BEGIN EFP */
 void CLog(const char* message);
 void My_Error_Handler(void);
+void HAL_UART_IDLE_IRQHandler(UART_HandleTypeDef *huart);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
