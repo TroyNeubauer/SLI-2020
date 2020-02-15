@@ -19,6 +19,7 @@ void GPS::Init()
 	Trace("Sent GPS baud rate change command");
 
 	HAL_UART_DeInit(m_GPSUART);
+	HAL_Delay(1);
 
 	m_GPSUART->Init.BaudRate = 115200;
 	if (HAL_UART_Init(m_GPSUART) != HAL_OK)
@@ -28,12 +29,12 @@ void GPS::Init()
 	{
 		Info("Successfully changed GPS baud rate to 115200 b/s");
 	}
+	HAL_Delay(1);
 
-	NMEASend("PMTK220,100");
-	Info("Set GPS to 10Hz");
+	//NMEASend("PMTK220,100");
+	//Info("Set GPS to 10Hz");
 
 	NMEASend("PMTK314,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0");
-}
 
 uint32_t startTicks;
 
@@ -64,15 +65,6 @@ void transferAbort(UART_HandleTypeDef *def)
 
 void GPS::Update()
 {
-	if (m_GPSUART->RxState == HAL_UART_STATE_READY)
-	{
-		Info("Calling HAL_UART_IRQHandler");
-		HAL_UART_IRQHandler(m_GPSUART);
-		Info("Starting GPS transfer");
-		startTicks = HAL_GetTick();
-		m_GPSUART->RxHalfCpltCallback = transferHalfComplete;
-		m_GPSUART->AbortReceiveCpltCallback = transferAbort;
-		m_GPSUART->RxCpltCallback = transferComplete;
 
 		Info("Calling HAL_UART_Receive_DMA");
 		HAL_UART_Receive_DMA(m_GPSUART, gpsBuf, sizeof(gpsBuf));
