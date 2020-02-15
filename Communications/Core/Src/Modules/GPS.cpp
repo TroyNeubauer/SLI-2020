@@ -4,7 +4,6 @@
 #include "Modules/CommunicationsBoard.h"
 
 #include "stm32f1xx.h"
-#include "stm32f1xx_hal.h"
 
 //The max NMEA sentence length should be 82 but we need to verify this
 uint8_t gpsBuf[128];

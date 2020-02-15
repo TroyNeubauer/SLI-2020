@@ -1,8 +1,7 @@
 #pragma once
 
 #include "Module.h"
-#include "stm32f1xx_hal.h"
-
+#include "stm32f1xx_ll_usart.h"
 
 class GPS : public SLIModule
 {
