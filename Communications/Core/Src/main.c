@@ -495,25 +495,28 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-
-void SerialPrintImpl(const char *message, uint32_t length)
+void UARTWrite(USART_TypeDef* usart, const char* data, uint32_t length)
 {
-
 	LL_GPIO_TogglePin(GPIOB, LL_GPIO_PIN_13);
 	for (uint32_t i = 0; i < length; i++)
 	{
-		LL_USART_TransmitData8(RADIO_UART, message[i]);
-		while (!LL_USART_IsActiveFlag_TXE(RADIO_UART))
+		LL_USART_TransmitData8(usart, data[i]);
+		while (!LL_USART_IsActiveFlag_TXE(usart))
 		{
 		}
 
 	}
-	while (!LL_USART_IsActiveFlag_TC(RADIO_UART))
+	while (!LL_USART_IsActiveFlag_TC(usart))
 	{
 	}
 
 	LL_GPIO_TogglePin(GPIOB, LL_GPIO_PIN_13);
 
+}
+
+void SerialPrintImpl(const char* message, uint32_t length)
+{
+	UARTWrite(RADIO_UART, message, length);
 }
 
 void My_Error_Handler(void)

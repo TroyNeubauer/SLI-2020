@@ -2,6 +2,7 @@
 
 #include "Module.h"
 #include "stm32f1xx_ll_usart.h"
+#include "stm32f1xx_ll_dma.h"
 
 class GPS : public SLIModule
 {
@@ -17,7 +18,13 @@ public:
 
 	virtual ~GPS() {}
 
-	void IRQHandler();
+//private:
+//Only public for the sake of calling from C
+	void DMA1_C5_IRQHandler();
+	void UART_IRQHandler();
+
+private:
+	void CheckRX();
 
 
 private:

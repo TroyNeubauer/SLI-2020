@@ -31,7 +31,7 @@ while(b'flash: 0' in subprocess.check_output(['st-info','--probe'])):
 
 sys.stdout.buffer.write((subprocess.check_output(['st-info','--probe'])))
 
-time.sleep(2)
+time.sleep(0.1)
 dots_print('Writing now ')
 print('')
 
@@ -57,3 +57,4 @@ while(True):
 	else:
 		sys.stdout.buffer.write(output)
 		input()
+

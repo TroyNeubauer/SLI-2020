@@ -20,6 +20,8 @@ CommunicationsBoard* boardPtr = nullptr;
 USART_TypeDef* s_RadioUart = nullptr;
 USART_TypeDef* s_GPSUart = nullptr;
 
+GPS* gpsPtr = nullptr;
+
 void SerialPrint(Formatter& formatter);
 
 const char* GetParentModuleName();
@@ -42,17 +44,16 @@ extern "C"
 		GPS gps(&board, GPSUart);
 
 		board.AddModule(&gps);
+		board.Info("Starting loop");
 		while(true)
 		{
 			board.Update();
 
 			if (HAL_GetTick() - last > 1250)
 			{
-				HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_12);
+				LL_GPIO_TogglePin(GPIOB, LL_GPIO_AF_EVENTOUT_PIN_12);
 				last = HAL_GetTick();
 			}
-			board.Info("...");
-			HAL_Delay(200);
 
 		}
 	}
@@ -62,6 +63,16 @@ extern "C"
 	{
 		cLog << '[' << GetParentModuleName() << " (C code)]: ";
 		cLog << message << '\n';
+	}
+
+	void DMA1_Channel5_IRQHandler_USER()
+	{
+		gpsPtr->DMA1_C5_IRQHandler();
+	}
+
+	void USART1_IRQHandler_USER()
+	{
+		gpsPtr->UART_IRQHandler();
 	}
 
 }

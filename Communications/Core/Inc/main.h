@@ -70,6 +70,10 @@ void CLog(const char* message);
 void My_Error_Handler(void);
 void DelayUS(uint16_t us);
 void SerialPrintImpl(const char* message, uint32_t length);
+void UARTWrite(USART_TypeDef* usart, const char* data, uint32_t length);
+
+void DMA1_Channel5_IRQHandler_USER();
+void USART1_IRQHandler_USER();
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
