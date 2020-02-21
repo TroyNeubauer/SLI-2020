@@ -65,14 +65,11 @@ namespace StatusValue {
 
 using LogLevelType = uint8_t;
 
-namespace LogLevel {
+constexpr LogLevelType LL_TRACE = 0;
+constexpr LogLevelType LL_INFO = 1;
+constexpr LogLevelType LL_WARN = 2;
+constexpr LogLevelType LL_ERROR = 3;
 
-	constexpr LogLevelType TRACE = 0;
-	constexpr LogLevelType INFO = 1;
-	constexpr LogLevelType WARN = 2;
-	constexpr LogLevelType ERROR = 3;
-
-}
 
 struct PacketHeader
 {
@@ -143,7 +140,7 @@ private:
 
 
 //A core module represents a module that can physically send and receive packets
-//Eg. the ground station, the STM32F103, and the STM32F205
+//Eg. the Ground Station, the STM32F103, and the STM32F205
 class SLICoreModule : public SLILogable
 {
 public:

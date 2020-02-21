@@ -1,3 +1,5 @@
+#include "gspch.h"
+
 #include "Formatter.h"
 #include "Core.h"
 
@@ -25,10 +27,10 @@ Formatter& Formatter::operator<<(char value) {
 }
 
 #ifdef ES_SIGNED_CHAR
-Formatter& Formatter::operator<<(u8 value)
+Formatter& Formatter::operator<<(uint8_t value)
 {
 	//Interpret as a single byte
-	PrintUnsignedInteger<u8>(value);
+	PrintUnsignedInteger<uint8_t>(value);
 	return *this;
 }
 #endif

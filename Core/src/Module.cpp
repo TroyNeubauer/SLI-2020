@@ -1,3 +1,4 @@
+#include "gspch.h"
 
 #include "Module.h"
 #include "Formatter.h"
@@ -88,7 +89,7 @@ void SLICoreModule::AddModule(SLIModule* module)
 {
 	SLI_FASSERT(m_ContainedModules[module->GetIntID()] == nullptr, f << "Module already exists! " << GetModuleIDName(module->GetID()));
 	m_ContainedModules[module->GetIntID()] = module;
-	Formatter formatter = BeginDeviceMessage(LogLevel::INFO);
+	Formatter formatter = BeginDeviceMessage(LL_INFO);
 	formatter << "Added module! ID " << module->GetIntID();
 	SendDebugMessage(formatter);
 	module->Init();
@@ -110,14 +111,14 @@ Formatter BeginMessage(const char* device, LogLevelType level)
 	SizedFormatter<256> result;
 	result << '[';
 	result << device;
-	if (level != LogLevel::TRACE)
+	if (level != LL_TRACE)
 	{
 		result << ' ';
-		if (level == LogLevel::INFO)
+		if (level == LL_INFO)
 			result << "info";
-		else if (level == LogLevel::WARN)
+		else if (level == LL_WARN)
 			result << "Warn";
-		else if (level == LogLevel::ERROR)
+		else if (level == LL_ERROR)
 			result << "ERROR";
 		else
 			result << "Unknown level";
@@ -136,14 +137,14 @@ void SLILogable::SendDebugMessage(Formatter& formatter)
 
 void SLILogable::Trace(const char* message)
 {
-	Formatter formatter = BeginDeviceMessage(LogLevel::TRACE);
+	Formatter formatter = BeginDeviceMessage(LL_TRACE);
 	formatter << message << '\n';
 	SendDebugMessage(formatter);
 }
 
 void SLILogable::Info(const char* message)
 {
-	Formatter formatter = BeginDeviceMessage(LogLevel::INFO);
+	Formatter formatter = BeginDeviceMessage(LL_INFO);
 	formatter << message << '\n';
 	SendDebugMessage(formatter);
 
@@ -151,7 +152,7 @@ void SLILogable::Info(const char* message)
 
 void SLILogable::Warn(const char* message)
 {
-	Formatter formatter = BeginDeviceMessage(LogLevel::WARN);
+	Formatter formatter = BeginDeviceMessage(LL_WARN);
 	formatter << message << '\n';
 	SendDebugMessage(formatter);
 
@@ -159,7 +160,7 @@ void SLILogable::Warn(const char* message)
 
 void SLILogable::Error(const char* message)
 {
-	Formatter formatter = BeginDeviceMessage(LogLevel::ERROR);
+	Formatter formatter = BeginDeviceMessage(LL_ERROR);
 	formatter << message << '\n';
 	SendDebugMessage(formatter);
 }
