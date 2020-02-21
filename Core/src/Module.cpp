@@ -80,7 +80,7 @@ void SLICoreModule::UpdateLocalModules()
 }
 
 
-uint16_t SizeOfPacket(const PacketHeader& header, Buffer& packet)
+uint16_t SizeOfPacketData(const PacketHeader& header, Buffer& packet)
 {
 	return 0;
 }
