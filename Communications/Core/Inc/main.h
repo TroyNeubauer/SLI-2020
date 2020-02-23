@@ -38,7 +38,6 @@ extern "C" {
 #include "stm32f1xx_ll_utils.h"
 #include "stm32f1xx_ll_pwr.h"
 #include "stm32f1xx_ll_spi.h"
-#include "stm32f1xx_ll_usart.h"
 #include "stm32f1xx.h"
 #include "stm32f1xx_ll_gpio.h"
 
@@ -71,6 +70,7 @@ void My_Error_Handler(void);
 void DelayUS(uint16_t us);
 void SerialPrintImpl(const char* message, uint32_t length);
 void UARTWrite(USART_TypeDef* usart, const char* data, uint32_t length);
+void UARTRead(USART_TypeDef* usart, char* data, uint32_t length);
 
 void DMA1_Channel5_IRQHandler_USER();
 void USART1_IRQHandler_USER();

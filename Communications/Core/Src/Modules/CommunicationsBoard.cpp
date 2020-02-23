@@ -9,13 +9,13 @@ CommunicationsBoard& CommunicationsBoard::GetInstance()
 
 	return *s_Instance;
 }
-
+/*
 CommunicationsBoard::CommunicationsBoard(USART_TypeDef* radioUART, USART_TypeDef* GPSUART)
 	: SLICoreModule(ModuleID::STM32F103), m_RadioUART(radioUART), m_GPSUART(GPSUART)
 {
 	s_Instance = this;
 }
-
+*/
 
 void CommunicationsBoard::Init()
 {

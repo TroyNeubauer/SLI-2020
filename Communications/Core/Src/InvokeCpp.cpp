@@ -2,7 +2,7 @@
 //#include "CommunicationsBoard.h"
 
 #include "stm32f1xx.h"
-#include "stm32f1xx_ll_usart.h"
+//#include "stm32f1xx_ll_usart.h"
 
 #include <cstdlib>
 #include <cstdio>
@@ -32,6 +32,7 @@ extern "C"
 
 	void InvokeCpp(USART_TypeDef* radioUart, USART_TypeDef* GPSUart)
 	{
+		/*
 		int last = HAL_GetTick();
 		s_RadioUart = radioUart;
 		s_GPSUart = GPSUart;
@@ -47,7 +48,20 @@ extern "C"
 		board.Info("Starting loop");
 		while(true)
 		{
-			board.Update();
+			while (!LL_USART_IsActiveFlag_RXNE(radioUart))
+			{
+			}
+			uint8_t temp = LL_USART_ReceiveData8(GPSUart);
+
+			while (!LL_USART_IsActiveFlag_TC(radioUart))
+			{
+			}
+			while (!LL_USART_IsActiveFlag_TXE(radioUart))
+			{
+			}
+			LL_USART_TransmitData8(radioUart, temp);
+
+			//board.Update();
 
 			if (HAL_GetTick() - last > 1250)
 			{
@@ -56,6 +70,7 @@ extern "C"
 			}
 
 		}
+		*/
 	}
 
 

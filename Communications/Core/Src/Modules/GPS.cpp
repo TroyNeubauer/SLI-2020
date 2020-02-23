@@ -39,7 +39,7 @@ void GPS::Init()
 
 	 NMEASend("PMTK314,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0");
 	 */
-	LL_DMA_DisableChannel(DMA1, LL_DMA_CHANNEL_5);
+/*	LL_DMA_DisableChannel(DMA1, LL_DMA_CHANNEL_5);
 
 	LL_DMA_ConfigAddresses(DMA1, LL_DMA_CHANNEL_5, LL_USART_DMA_GetRegAddr(m_GPSUART), (uint32_t) gpsBuf,
 	        LL_DMA_GetDataTransferDirection(DMA1, LL_DMA_CHANNEL_5));
@@ -58,7 +58,7 @@ void GPS::Init()
 	// Enable DMA_1,CHANNEL_5
 	LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_5);
 
-	Info("Enabling IDLE interupts");
+	Info("Enabling IDLE interupts");*/
 }
 
 uint32_t startTicks;
@@ -98,11 +98,11 @@ void GPS::DMA1_C5_IRQHandler()
 void GPS::UART_IRQHandler()
 {
 	Info("GPS::UART_IRQHandler");
-	if (LL_USART_IsEnabledIT_IDLE(USART1) && LL_USART_IsActiveFlag_IDLE(USART1))
-	{
-		LL_USART_ClearFlag_IDLE(USART1); /* Clear IDLE line flag */
-		CheckRX(); /* Check for data to process */
-	}
+//	if (LL_USART_IsEnabledIT_IDLE(USART1) && LL_USART_IsActiveFlag_IDLE(USART1))
+//	{
+//		LL_USART_ClearFlag_IDLE(USART1); /* Clear IDLE line flag */
+//		CheckRX(); /* Check for data to process */
+//	}
 }
 
 void GPS::NMEASend(const char *command)
