@@ -41,7 +41,7 @@ namespace PacketType {
 	constexpr PacketTypeValue RESPONSE = 5;
 
 
-	//Used to identify
+	//Used to identify array sizes (not an actual enum value)
 	constexpr PacketTypeValue MAX_PACKET_TYPE = 7;
 }
 
@@ -65,14 +65,11 @@ namespace StatusValue {
 
 using LogLevelType = uint8_t;
 
-namespace LogLevel {
+constexpr LogLevelType LL_TRACE = 0;
+constexpr LogLevelType LL_INFO = 1;
+constexpr LogLevelType LL_WARN = 2;
+constexpr LogLevelType LL_ERROR = 3;
 
-	constexpr LogLevelType TRACE = 0;
-	constexpr LogLevelType INFO = 1;
-	constexpr LogLevelType WARN = 2;
-	constexpr LogLevelType ERROR = 3;
-
-}
 
 struct PacketHeader
 {
@@ -143,7 +140,7 @@ private:
 
 
 //A core module represents a module that can physically send and receive packets
-//Eg. the ground station, the STM32F103, and the STM32F205
+//Eg. the Ground Station, the STM32F103, and the STM32F205
 class SLICoreModule : public SLILogable
 {
 public:
@@ -193,6 +190,72 @@ private:
 
 class Buffer;
 
-uint16_t SizeOfPacket(const PacketHeader& header, Buffer& buffer);
+const int MAX_PACKET_DATA_SIZE = 256;
+
+//Returns the number of bytes of data in buffer
+uint16_t SizeOfPacketData(const PacketHeader& header, Buffer& buffer);
 
 
+struct InitPacket
+{
+	static constexpr uint16_t MAGIC_VALUE = 0xABA5;
+
+	uint16_t MAGIC = MAGIC_VALUE;
+};
+
+struct StatusPacket
+{
+	static constexpr uint16_t MAGIC_VALUE = 0xABA6;
+
+	uint16_t MAGIC = MAGIC_VALUE;
+};
+
+struct DataPacket_GPS
+{
+	static constexpr uint16_t MAGIC_VALUE = 0xABA7;
+
+	uint16_t MAGIC = MAGIC_VALUE;
+	/*
+	const char* NMEASentence;//Encoded after this struct
+	*/
+	uint16_t NMEASentenceLength;//How many bytes the string written after this struct is
+};
+
+struct DataPacket_STMF103
+{
+	static constexpr uint16_t MAGIC_VALUE = 0xABB0;
+
+	uint16_t MAGIC = MAGIC_VALUE;
+
+
+};
+
+struct DataPacket_STMF205
+{
+	static constexpr uint16_t MAGIC_VALUE = 0xABB0;
+
+	uint16_t MAGIC = MAGIC_VALUE;
+
+
+};
+
+struct MessagePacket
+{
+	static constexpr uint16_t MAGIC_VALUE = 0xABC0;
+
+	uint16_t MAGIC = MAGIC_VALUE;
+	/*
+	const char* Message;//Encoded after this struct
+	*/
+	uint16_t MessageLength;//How many bytes the string written after this struct is
+};
+
+//A device is asking another device for something
+constexpr PacketTypeValue REQUEST = 4;
+
+//A device is asking another device for something
+constexpr PacketTypeValue RESPONSE = 5;
+
+
+//Used to identify array sizes (not an actual enum value)
+constexpr PacketTypeValue MAX_PACKET_TYPE = 7;
