@@ -2,14 +2,17 @@
 
 #include "Core.h"
 
-#include <stdint.h>
-#include <stdlib.h>
+#include <cstdint>
+#include <cstdlib>
 
 class Buffer
 {
 public:
-	Buffer(uint8_t* buf, uint32_t offset, uint32_t capacity)
-		: m_Buf(buf), m_Offset(offset), m_Capacity(capacity) {}
+	Buffer(uint8_t* buf, uint32_t capacity, uint32_t offset = 0)
+		: m_Buf(buf), m_Capacity(capacity), m_Offset(offset) {}
+
+	Buffer(const Buffer& other) : m_Buf(other.m_Buf), m_Capacity(other.m_Capacity), m_Offset(other.m_Offset) {}
+
 
 	template<typename T>
 	void Read(T& value)
@@ -19,19 +22,17 @@ public:
 		m_Offset += sizeof(T);
 	}
 
-public:
+	inline uint8_t* Begin() { return m_Buf; }
+	inline const uint8_t* Begin() const { return m_Buf; }
 
-#ifdef STM
-	static thread_local char BUF[128];
-#else//Ground Station
-	static thread_local char BUF[1024];
+	template<typename T> T* As() { return reinterpret_cast<T*>(m_Buf); }
+	template<typename T> const T* As() const { return reinterpret_cast<T*>(m_Buf); }
 
-#endif
 
 private:
 	uint8_t* m_Buf;
-	uint32_t m_Offset;
 	uint32_t m_Capacity;
+	uint32_t m_Offset;
 
 };
 

@@ -4,6 +4,8 @@
 
 #include <type_traits>
 #include <array>
+#include <cstddef>
+
 
 #include "Buffer.h"
 #include "Formatter.h"
@@ -17,51 +19,6 @@ enum class ModuleID
 
 const char* GetModuleIDName(ModuleID id);
 
-using PacketTypeValue = uint8_t;
-
-namespace PacketType {
-	//Indicates that a certain module has initialized
-	//Only sent once
-	//This is the first packet that will be sent for a device
-	constexpr PacketTypeValue INIT = 0;
-
-	//The module has entered a different status (GPS lock, accelerometer mode set, etc.)
-	constexpr PacketTypeValue STATUS = 1;
-
-	//This module is sending new data (altitude reading, velocity, etc.)
-	constexpr PacketTypeValue DATA = 2;
-
-	//A string message of a particular log level
-	constexpr PacketTypeValue MESSAGE = 3;
-
-	//A device is asking another device for something
-	constexpr PacketTypeValue REQUEST = 4;
-
-	//A device is asking another device for something
-	constexpr PacketTypeValue RESPONSE = 5;
-
-
-	//Used to identify array sizes (not an actual enum value)
-	constexpr PacketTypeValue MAX_PACKET_TYPE = 7;
-}
-
-using RequestTypeValue = uint8_t;
-
-namespace RequestType {
-
-	constexpr RequestTypeValue NONE = 0;
-	constexpr RequestTypeValue WAKE = 1;
-}
-
-using StatusTypeValue = uint8_t;
-
-namespace StatusValue {
-
-	constexpr StatusTypeValue GPS_LOCK = 0;
-	constexpr StatusTypeValue GPS_10HZ = 1;
-	constexpr StatusTypeValue GPS_115200_BAUD_RATE = 1;
-
-}
 
 using LogLevelType = uint8_t;
 
@@ -69,22 +26,6 @@ constexpr LogLevelType LL_TRACE = 0;
 constexpr LogLevelType LL_INFO = 1;
 constexpr LogLevelType LL_WARN = 2;
 constexpr LogLevelType LL_ERROR = 3;
-
-
-struct PacketHeader
-{
-	uint32_t ID;
-	uint32_t UnixSeconds;//The time this packet was sent at
-	uint32_t NanoSeconds;
-
-	//Where the packet originally came from
-	ModuleID Destination;
-	ModuleID Forwarder;
-
-	ModuleID From;
-	PacketTypeValue Type;
-
-};
 
 
 Formatter BeginMessage(const char* device, LogLevelType level);
@@ -111,6 +52,7 @@ public:
 };
 
 class SLICoreModule;
+class PacketHeader;
 
 //An SLI module represents a sensor or processor that can send and receive packets
 //Eg. the radio, GPS, altimeter, etc
@@ -188,74 +130,3 @@ private:
 	ModuleID m_ModuleID;
 };
 
-class Buffer;
-
-const int MAX_PACKET_DATA_SIZE = 256;
-
-//Returns the number of bytes of data in buffer
-uint16_t SizeOfPacketData(const PacketHeader& header, Buffer& buffer);
-
-
-struct InitPacket
-{
-	static constexpr uint16_t MAGIC_VALUE = 0xABA5;
-
-	uint16_t MAGIC = MAGIC_VALUE;
-};
-
-struct StatusPacket
-{
-	static constexpr uint16_t MAGIC_VALUE = 0xABA6;
-
-	uint16_t MAGIC = MAGIC_VALUE;
-};
-
-struct DataPacket_GPS
-{
-	static constexpr uint16_t MAGIC_VALUE = 0xABA7;
-
-	uint16_t MAGIC = MAGIC_VALUE;
-	/*
-	const char* NMEASentence;//Encoded after this struct
-	*/
-	uint16_t NMEASentenceLength;//How many bytes the string written after this struct is
-};
-
-struct DataPacket_STMF103
-{
-	static constexpr uint16_t MAGIC_VALUE = 0xABB0;
-
-	uint16_t MAGIC = MAGIC_VALUE;
-
-
-};
-
-struct DataPacket_STMF205
-{
-	static constexpr uint16_t MAGIC_VALUE = 0xABB0;
-
-	uint16_t MAGIC = MAGIC_VALUE;
-
-
-};
-
-struct MessagePacket
-{
-	static constexpr uint16_t MAGIC_VALUE = 0xABC0;
-
-	uint16_t MAGIC = MAGIC_VALUE;
-	/*
-	const char* Message;//Encoded after this struct
-	*/
-	uint16_t MessageLength;//How many bytes the string written after this struct is
-};
-
-//A device is asking another device for something
-constexpr PacketTypeValue REQUEST = 4;
-
-//A device is asking another device for something
-constexpr PacketTypeValue RESPONSE = 5;
-
-
-//Used to identify array sizes (not an actual enum value)
-constexpr PacketTypeValue MAX_PACKET_TYPE = 7;

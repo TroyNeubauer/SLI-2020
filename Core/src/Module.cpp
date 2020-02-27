@@ -1,6 +1,7 @@
 #include "gspch.h"
 
 #include "Module.h"
+#include "Packet.h"
 #include "Formatter.h"
 
 #include <algorithm>
@@ -79,11 +80,6 @@ void SLICoreModule::UpdateLocalModules()
 	}
 }
 
-
-uint16_t SizeOfPacketData(const PacketHeader& header, Buffer& packet)
-{
-	return 0;
-}
 
 void SLICoreModule::AddModule(SLIModule* module)
 {
