@@ -81,6 +81,96 @@ static void MX_TIM1_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 uint8_t receive_buff[128];
+
+static HAL_StatusTypeDef UART_WaitOnFlagUntilTimeout(UART_HandleTypeDef *huart, uint32_t Flag, FlagStatus Status, uint32_t Tickstart, uint32_t Timeout)
+{
+  /* Wait until flag is set */
+  while ((__HAL_UART_GET_FLAG(huart, Flag) ? SET : RESET) == Status)
+  {
+    /* Check for the Timeout */
+    if (Timeout != HAL_MAX_DELAY)
+    {
+      if ((Timeout == 0U) || ((HAL_GetTick() - Tickstart) > Timeout))
+      {
+        /* Disable TXE, RXNE, PE and ERR (Frame error, noise error, overrun error) interrupts for the interrupt process */
+        CLEAR_BIT(huart->Instance->CR1, (USART_CR1_RXNEIE | USART_CR1_PEIE | USART_CR1_TXEIE));
+        CLEAR_BIT(huart->Instance->CR3, USART_CR3_EIE);
+
+        huart->gState  = HAL_UART_STATE_READY;
+        huart->RxState = HAL_UART_STATE_READY;
+
+        /* Process Unlocked */
+        __HAL_UNLOCK(huart);
+
+        return HAL_TIMEOUT;
+      }
+    }
+  }
+  return HAL_OK;
+}
+
+
+HAL_StatusTypeDef MY_GPS_UART_Receive(UART_HandleTypeDef *huart, uint8_t *pData, uint16_t Size, uint16_t* bytesRead)
+{
+	uint16_t byteCount = 0U;
+
+	/* Check that a Rx process is not already ongoing */
+	if (huart->RxState == HAL_UART_STATE_READY)
+	{
+		if ((pData == NULL) || (Size == 0U))
+		{
+			return  HAL_ERROR;
+		}
+
+		/* Process Locked */
+		__HAL_LOCK(huart);
+
+		huart->ErrorCode = HAL_UART_ERROR_NONE;
+		huart->RxState = HAL_UART_STATE_BUSY_RX;
+
+
+		huart->RxXferSize = Size;
+		huart->RxXferCount = Size;
+
+		/* Check the remain data to be received */
+		while (huart->RxXferCount > 0U)
+		{
+			huart->RxXferCount--;
+			uint8_t byte;
+
+	        if (UART_WaitOnFlagUntilTimeout(huart, UART_FLAG_RXNE, RESET, HAL_GetTick(), 50) != HAL_OK)
+	        {
+	        	*bytesRead = byteCount;
+	            return HAL_TIMEOUT;
+	        }
+
+			byteCount++;
+			if (huart->Init.Parity == UART_PARITY_NONE)
+			{
+				byte = (uint8_t)(huart->Instance->DR & (uint8_t)0x00FF);
+			}
+			else
+			{
+				byte = (uint8_t)(huart->Instance->DR & (uint8_t)0x007F);
+			}
+			*pData++ = byte;
+		}
+
+
+		/* At end of Rx process, restore huart->RxState to Ready */
+		huart->RxState = HAL_UART_STATE_READY;
+		huart->RxXferCount = 0;
+		/* Process Unlocked */
+		__HAL_UNLOCK(huart);
+		*bytesRead = byteCount;
+		return HAL_OK;
+	}
+	else
+	{
+		return HAL_BUSY;
+	}
+}
+
 /* USER CODE END 0 */
 
 /**
@@ -143,11 +233,15 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-		unsigned char c;
 		//const char* str = "TEST PLEASE WORK";
-		HAL_UART_Receive(GPS_UART, &c, sizeof(c), HAL_MAX_DELAY);
-		HAL_UART_Transmit(RADIO_UART, &c, sizeof(c), HAL_MAX_DELAY);
-		LL_GPIO_TogglePin(GPIOB, LL_GPIO_PIN_13);
+		uint8_t buf[512];
+		uint16_t bytes;
+		MY_GPS_UART_Receive(GPS_UART, buf, sizeof(buf), &bytes);
+		if (bytes > 0)
+		{
+			HAL_UART_Transmit(RADIO_UART, buf, bytes, HAL_MAX_DELAY);
+			LL_GPIO_TogglePin(GPIOB, LL_GPIO_PIN_13);
+		}
 	}
   /* USER CODE END 3 */
 }
