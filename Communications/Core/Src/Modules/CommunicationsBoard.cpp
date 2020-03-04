@@ -1,4 +1,8 @@
 #include "Modules/CommunicationsBoard.h"
+#include "Packet.h"
+#include "Module.h"
+
+#include "main.h"
 
 static CommunicationsBoard* s_Instance = nullptr;
 
@@ -9,13 +13,13 @@ CommunicationsBoard& CommunicationsBoard::GetInstance()
 
 	return *s_Instance;
 }
-/*
+
 CommunicationsBoard::CommunicationsBoard(USART_TypeDef* radioUART, USART_TypeDef* GPSUART)
 	: SLICoreModule(ModuleID::STM32F103), m_RadioUART(radioUART), m_GPSUART(GPSUART)
 {
 	s_Instance = this;
 }
-*/
+
 
 void CommunicationsBoard::Init()
 {
@@ -32,13 +36,21 @@ void CommunicationsBoard::RoutePacket(const PacketHeader &header, Buffer &packet
 {
 	if (header.Destination == ModuleID::GROUND_STATION)
 	{
-		uint8_t *buffer = const_cast<uint8_t*>(reinterpret_cast<const uint8_t*>(&header));
-		//HAL_UART_Transmit(m_RadioUART, buffer, sizeof(header) + SizeOfPacket(header, packet), 0);
+		const char* buffer = reinterpret_cast<const char*>(&header);
+		UARTWrite(m_RadioUART, DMA1, RADIO_DMA_CHANNEL_TX, buffer, sizeof(header) + SizeOfPacketData(header, packet));
+
 	}
-	else
+	else if (header.Destination == ModuleID::STM32F205)
 	{
 		//Forward to the sensor board
 
+	}
+	else
+	{
+		//TODO: handle error
+		Formatter formatter = BeginDeviceMessage(LL_ERROR);
+		formatter << "Unknown destination " << static_cast<uint32_t>(header.Destination) << ", Corrupt packet?";
+		SendDebugMessage(formatter);
 	}
 }
 

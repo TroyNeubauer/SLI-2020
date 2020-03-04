@@ -53,7 +53,7 @@ namespace StatusValue {
 
 struct PacketHeader
 {
-	uint32_t CRC;
+	uint32_t CRC32;
 
 	uint32_t ID;
 	uint32_t UnixSeconds;//The time this packet was sent at
@@ -68,7 +68,7 @@ struct PacketHeader
 
 };
 
-static_assert(offsetof(PacketHeader, CRC) == 0, "CRC must start at offset 0");
+static_assert(offsetof(PacketHeader, CRC32) == 0, "CRC must start at offset 0");
 
 
 class Buffer;

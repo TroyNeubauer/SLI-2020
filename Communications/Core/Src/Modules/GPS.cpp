@@ -12,53 +12,53 @@ uint8_t gpsBuf[128];
 void GPS::Init()
 {
 	Trace("GPS::Init");
-	/*	NMEASend("PMTK251,115200");
-	 Trace("Sent GPS baud rate change command");
+	NMEASend("PMTK251,115200");
+	Trace("Sent GPS baud rate change command");
 
-	 LL_USART_DeInit(m_GPSUART);
+	LL_USART_DeInit(m_GPSUART);
 
-	 LL_USART_InitTypeDef USART_InitStruct =
-	 { 0 };
+	LL_USART_InitTypeDef USART_InitStruct =
+	{ 0 };
 
-	 LL_USART_Disable(USART1);
-	 USART_InitStruct.BaudRate = 115200;
-	 USART_InitStruct.DataWidth = LL_USART_DATAWIDTH_8B;
-	 USART_InitStruct.StopBits = LL_USART_STOPBITS_1;
-	 USART_InitStruct.Parity = LL_USART_PARITY_NONE;
-	 USART_InitStruct.TransferDirection = LL_USART_DIRECTION_TX_RX;
-	 USART_InitStruct.HardwareFlowControl = LL_USART_HWCONTROL_NONE;
-	 USART_InitStruct.OverSampling = LL_USART_OVERSAMPLING_16;
-	 LL_USART_Init(USART1, &USART_InitStruct);
-	 LL_USART_Enable(USART1);
+	LL_USART_Disable(USART1);
+	USART_InitStruct.BaudRate = 115200;
+	USART_InitStruct.DataWidth = LL_USART_DATAWIDTH_8B;
+	USART_InitStruct.StopBits = LL_USART_STOPBITS_1;
+	USART_InitStruct.Parity = LL_USART_PARITY_NONE;
+	USART_InitStruct.TransferDirection = LL_USART_DIRECTION_TX_RX;
+	USART_InitStruct.HardwareFlowControl = LL_USART_HWCONTROL_NONE;
+	USART_InitStruct.OverSampling = LL_USART_OVERSAMPLING_16;
+	LL_USART_Init(USART1, &USART_InitStruct);
+	LL_USART_Enable(USART1);
 
-	 Info("Changed GPS baud rate to 115200 b/s");
+	Info("Changed GPS baud rate to 115200 b/s");
 
-	 HAL_Delay(1);
-	 //NMEASend("PMTK220,100");
-	 //Info("Set GPS to 10Hz");
+	HAL_Delay(1);
+	//NMEASend("PMTK220,100");
+	//Info("Set GPS to 10Hz");
 
-	 NMEASend("PMTK314,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0");
-	 */
-/*	LL_DMA_DisableChannel(DMA1, LL_DMA_CHANNEL_5);
+	NMEASend("PMTK314,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0");
 
-	LL_DMA_ConfigAddresses(DMA1, LL_DMA_CHANNEL_5, LL_USART_DMA_GetRegAddr(m_GPSUART), (uint32_t) gpsBuf,
-	        LL_DMA_GetDataTransferDirection(DMA1, LL_DMA_CHANNEL_5));
-	// Configure data length
-	LL_DMA_SetDataLength(DMA1, LL_DMA_CHANNEL_5, sizeof(gpsBuf));
-	// Enable DMA Transfer complete interrupt
-	LL_DMA_EnableIT_TC(DMA1, LL_DMA_CHANNEL_5);
-	LL_USART_EnableIT_IDLE(m_GPSUART);
+	/*	LL_DMA_DisableChannel(DMA1, LL_DMA_CHANNEL_5);
 
-//	LL_SPI_SetRxFIFOThreshold(SPI3,LL_SPI_RX_FIFO_TH_QUARTER);
-//	LL_SPI_EnableDMAReq_RX(SPI3);
-	LL_USART_EnableDMAReq_RX(m_GPSUART);
+	 LL_DMA_ConfigAddresses(DMA1, LL_DMA_CHANNEL_5, LL_USART_DMA_GetRegAddr(m_GPSUART), (uint32_t) gpsBuf,
+	 LL_DMA_GetDataTransferDirection(DMA1, LL_DMA_CHANNEL_5));
+	 // Configure data length
+	 LL_DMA_SetDataLength(DMA1, LL_DMA_CHANNEL_5, sizeof(gpsBuf));
+	 // Enable DMA Transfer complete interrupt
+	 LL_DMA_EnableIT_TC(DMA1, LL_DMA_CHANNEL_5);
+	 LL_USART_EnableIT_IDLE(m_GPSUART);
 
-	// Enable UART
-	LL_USART_Enable(m_GPSUART);
-	// Enable DMA_1,CHANNEL_5
-	LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_5);
+	 //	LL_SPI_SetRxFIFOThreshold(SPI3,LL_SPI_RX_FIFO_TH_QUARTER);
+	 //	LL_SPI_EnableDMAReq_RX(SPI3);
+	 LL_USART_EnableDMAReq_RX(m_GPSUART);
 
-	Info("Enabling IDLE interupts");*/
+	 // Enable UART
+	 LL_USART_Enable(m_GPSUART);
+	 // Enable DMA_1,CHANNEL_5
+	 LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_5);
+
+	 Info("Enabling IDLE interupts");*/
 }
 
 uint32_t startTicks;
@@ -124,10 +124,10 @@ void GPS::NMEASend(const char *command)
 	char buf[128];
 	int chars = snprintf(buf, sizeof(buf), "$%s*%02X\r\n", command, checksum);
 	SLI_ASSERT(chars != -1, "NMEASend snprintf error");
-	SLI_ASSERT(chars < (int) sizeof(buf), "NMEASend buffer overflow");
+	SLI_ASSERT(chars < (int ) sizeof(buf), "NMEASend buffer overflow");
 	Info("Sending command to GPS:");
 	Info(buf);
-	UARTWrite(m_GPSUART, buf, chars);
+	UARTWrite(m_GPSUART, DMA1, GPS_DMA_CHANNEL_TX, buf, chars);
 
 }
 

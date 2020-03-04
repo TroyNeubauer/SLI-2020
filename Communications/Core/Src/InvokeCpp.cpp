@@ -1,8 +1,6 @@
 
-//#include "CommunicationsBoard.h"
 
 #include "stm32f1xx.h"
-//#include "stm32f1xx_ll_usart.h"
 
 #include <cstdlib>
 #include <cstdio>
@@ -13,6 +11,7 @@
 #include "main.h"
 
 #include "Core.h"
+#include "Packet.h"
 
 
 CommunicationsBoard* boardPtr = nullptr;
@@ -32,7 +31,7 @@ extern "C"
 
 	void InvokeCpp(USART_TypeDef* radioUart, USART_TypeDef* GPSUart)
 	{
-		/*
+
 		int last = HAL_GetTick();
 		s_RadioUart = radioUart;
 		s_GPSUart = GPSUart;
@@ -48,20 +47,7 @@ extern "C"
 		board.Info("Starting loop");
 		while(true)
 		{
-			while (!LL_USART_IsActiveFlag_RXNE(radioUart))
-			{
-			}
-			uint8_t temp = LL_USART_ReceiveData8(GPSUart);
-
-			while (!LL_USART_IsActiveFlag_TC(radioUart))
-			{
-			}
-			while (!LL_USART_IsActiveFlag_TXE(radioUart))
-			{
-			}
-			LL_USART_TransmitData8(radioUart, temp);
-
-			//board.Update();
+			board.Update();
 
 			if (HAL_GetTick() - last > 1250)
 			{
@@ -70,7 +56,6 @@ extern "C"
 			}
 
 		}
-		*/
 	}
 
 
@@ -99,9 +84,28 @@ void SerialPrint(Formatter& formatter)
 		My_Error_Handler();
 	}
 
-	formatter << '\n';
+	StackBuffer<sizeof(PacketHeader) + 256> buf;
+	Buffer dataBuffer(buf, sizeof(PacketHeader));
 
-	SerialPrintImpl(formatter.Data(), formatter.Size());
+	PacketHeader* header = buf.As<PacketHeader>();
+	header->Destination = ModuleID::GROUND_STATION;
+	header->Forwarder = ModuleID::NONE;
+	header->From = ModuleID::STM32F103;
+	header->NanoSeconds = 69;
+	header->UnixSeconds = 420;
+	header->Type = PacketType::MESSAGE;
+	header->ID = 0;
+
+	MessagePacket* messagePacket = dataBuffer.As<MessagePacket>();
+	messagePacket->Level = LL_INFO;
+	messagePacket->MessageLength = formatter.Size();
+	char* destMessage = dataBuffer.As<char>() + sizeof(MessagePacket);
+	memcpy(destMessage, formatter.Data(), formatter.Size());
+
+
+	uint32_t length = sizeof(PacketHeader) + sizeof(MessagePacket) + formatter.Size();
+	UARTWrite(RADIO_UART, DMA1, RADIO_DMA_CHANNEL_TX, reinterpret_cast<const char*>(buf.Begin()), length);
+
 
 }
 

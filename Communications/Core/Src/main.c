@@ -37,8 +37,6 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define RADIO_UART &huart2
-#define GPS_UART &huart1
 
 #define INIT_STAGE_NONE 0
 #define INIT_STAGE_HAL 1
@@ -57,13 +55,7 @@ char initStage = INIT_STAGE_NONE;
 
 TIM_HandleTypeDef htim1;
 
-UART_HandleTypeDef huart1;
-UART_HandleTypeDef huart2;
-DMA_HandleTypeDef hdma_usart1_rx;
-
 /* USER CODE BEGIN PV */
-//#define GPS_UART USART1
-//#define RADIO_UART USART2
 
 /* USER CODE END PV */
 
@@ -80,96 +72,6 @@ static void MX_TIM1_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-uint8_t receive_buff[128];
-
-static HAL_StatusTypeDef UART_WaitOnFlagUntilTimeout(UART_HandleTypeDef *huart, uint32_t Flag, FlagStatus Status, uint32_t Tickstart, uint32_t Timeout)
-{
-  /* Wait until flag is set */
-  while ((__HAL_UART_GET_FLAG(huart, Flag) ? SET : RESET) == Status)
-  {
-    /* Check for the Timeout */
-    if (Timeout != HAL_MAX_DELAY)
-    {
-      if ((Timeout == 0U) || ((HAL_GetTick() - Tickstart) > Timeout))
-      {
-        /* Disable TXE, RXNE, PE and ERR (Frame error, noise error, overrun error) interrupts for the interrupt process */
-        CLEAR_BIT(huart->Instance->CR1, (USART_CR1_RXNEIE | USART_CR1_PEIE | USART_CR1_TXEIE));
-        CLEAR_BIT(huart->Instance->CR3, USART_CR3_EIE);
-
-        huart->gState  = HAL_UART_STATE_READY;
-        huart->RxState = HAL_UART_STATE_READY;
-
-        /* Process Unlocked */
-        __HAL_UNLOCK(huart);
-
-        return HAL_TIMEOUT;
-      }
-    }
-  }
-  return HAL_OK;
-}
-
-
-HAL_StatusTypeDef MY_GPS_UART_Receive(UART_HandleTypeDef *huart, uint8_t *pData, uint16_t Size, uint16_t* bytesRead)
-{
-	uint16_t byteCount = 0U;
-
-	/* Check that a Rx process is not already ongoing */
-	if (huart->RxState == HAL_UART_STATE_READY)
-	{
-		if ((pData == NULL) || (Size == 0U))
-		{
-			return  HAL_ERROR;
-		}
-
-		/* Process Locked */
-		__HAL_LOCK(huart);
-
-		huart->ErrorCode = HAL_UART_ERROR_NONE;
-		huart->RxState = HAL_UART_STATE_BUSY_RX;
-
-
-		huart->RxXferSize = Size;
-		huart->RxXferCount = Size;
-
-		/* Check the remain data to be received */
-		while (huart->RxXferCount > 0U)
-		{
-			huart->RxXferCount--;
-			uint8_t byte;
-
-	        if (UART_WaitOnFlagUntilTimeout(huart, UART_FLAG_RXNE, RESET, HAL_GetTick(), 50) != HAL_OK)
-	        {
-	        	*bytesRead = byteCount;
-	            return HAL_TIMEOUT;
-	        }
-
-			byteCount++;
-			if (huart->Init.Parity == UART_PARITY_NONE)
-			{
-				byte = (uint8_t)(huart->Instance->DR & (uint8_t)0x00FF);
-			}
-			else
-			{
-				byte = (uint8_t)(huart->Instance->DR & (uint8_t)0x007F);
-			}
-			*pData++ = byte;
-		}
-
-
-		/* At end of Rx process, restore huart->RxState to Ready */
-		huart->RxState = HAL_UART_STATE_READY;
-		huart->RxXferCount = 0;
-		/* Process Unlocked */
-		__HAL_UNLOCK(huart);
-		*bytesRead = byteCount;
-		return HAL_OK;
-	}
-	else
-	{
-		return HAL_BUSY;
-	}
-}
 
 /* USER CODE END 0 */
 
@@ -226,25 +128,23 @@ int main(void)
 
 	LL_GPIO_TogglePin(GPIOB, LL_GPIO_PIN_13);
 
-	//CLog("Invoking C++ code");
-	//InvokeCpp(RADIO_UART, GPS_UART);
+	CLog("Invoking C++ code");
+	InvokeCpp(RADIO_UART, GPS_UART);
 	while (1)
 	{
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-		//const char* str = "TEST PLEASE WORK";
-		uint8_t buf[512];
-		uint16_t bytes;
-		MY_GPS_UART_Receive(GPS_UART, buf, sizeof(buf), &bytes);
-		if (bytes > 0)
-		{
-			HAL_UART_Transmit(RADIO_UART, buf, bytes, HAL_MAX_DELAY);
-			LL_GPIO_TogglePin(GPIOB, LL_GPIO_PIN_13);
-		}
+		const char* message = "0123456789";
+		LL_GPIO_TogglePin(GPIOB, LL_GPIO_PIN_13);
+		UARTWrite(RADIO_UART, DMA1, RADIO_DMA_CHANNEL_TX, message, strlen(message));
+		//LL_USART_EnableIT_TC(RADIO_UART);
+
+	// how to start sending with DMA?!
 	}
   /* USER CODE END 3 */
 }
+
 
 /**
   * @brief System Clock Configuration
@@ -407,21 +307,77 @@ static void MX_USART1_UART_Init(void)
 
   /* USER CODE END USART1_Init 0 */
 
+  LL_USART_InitTypeDef USART_InitStruct = {0};
+
+  LL_GPIO_InitTypeDef GPIO_InitStruct = {0};
+
+  /* Peripheral clock enable */
+  LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_USART1);
+  
+  LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_GPIOA);
+  /**USART1 GPIO Configuration  
+  PA9   ------> USART1_TX
+  PA10   ------> USART1_RX 
+  */
+  GPIO_InitStruct.Pin = LL_GPIO_PIN_9;
+  GPIO_InitStruct.Mode = LL_GPIO_MODE_ALTERNATE;
+  GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_HIGH;
+  GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
+  LL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  GPIO_InitStruct.Pin = LL_GPIO_PIN_10;
+  GPIO_InitStruct.Mode = LL_GPIO_MODE_FLOATING;
+  LL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  /* USART1 DMA Init */
+  
+  /* USART1_RX Init */
+  LL_DMA_SetDataTransferDirection(DMA1, LL_DMA_CHANNEL_5, LL_DMA_DIRECTION_PERIPH_TO_MEMORY);
+
+  LL_DMA_SetChannelPriorityLevel(DMA1, LL_DMA_CHANNEL_5, LL_DMA_PRIORITY_LOW);
+
+  LL_DMA_SetMode(DMA1, LL_DMA_CHANNEL_5, LL_DMA_MODE_CIRCULAR);
+
+  LL_DMA_SetPeriphIncMode(DMA1, LL_DMA_CHANNEL_5, LL_DMA_PERIPH_NOINCREMENT);
+
+  LL_DMA_SetMemoryIncMode(DMA1, LL_DMA_CHANNEL_5, LL_DMA_MEMORY_INCREMENT);
+
+  LL_DMA_SetPeriphSize(DMA1, LL_DMA_CHANNEL_5, LL_DMA_PDATAALIGN_BYTE);
+
+  LL_DMA_SetMemorySize(DMA1, LL_DMA_CHANNEL_5, LL_DMA_MDATAALIGN_BYTE);
+
+  /* USART1_TX Init */
+  LL_DMA_SetDataTransferDirection(DMA1, LL_DMA_CHANNEL_4, LL_DMA_DIRECTION_MEMORY_TO_PERIPH);
+
+  LL_DMA_SetChannelPriorityLevel(DMA1, LL_DMA_CHANNEL_4, LL_DMA_PRIORITY_LOW);
+
+  LL_DMA_SetMode(DMA1, LL_DMA_CHANNEL_4, LL_DMA_MODE_NORMAL);
+
+  LL_DMA_SetPeriphIncMode(DMA1, LL_DMA_CHANNEL_4, LL_DMA_PERIPH_NOINCREMENT);
+
+  LL_DMA_SetMemoryIncMode(DMA1, LL_DMA_CHANNEL_4, LL_DMA_MEMORY_INCREMENT);
+
+  LL_DMA_SetPeriphSize(DMA1, LL_DMA_CHANNEL_4, LL_DMA_PDATAALIGN_BYTE);
+
+  LL_DMA_SetMemorySize(DMA1, LL_DMA_CHANNEL_4, LL_DMA_MDATAALIGN_BYTE);
+
+  /* USART1 interrupt Init */
+  NVIC_SetPriority(USART1_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(),0, 0));
+  NVIC_EnableIRQ(USART1_IRQn);
+
   /* USER CODE BEGIN USART1_Init 1 */
 
   /* USER CODE END USART1_Init 1 */
-  huart1.Instance = USART1;
-  huart1.Init.BaudRate = 9600;
-  huart1.Init.WordLength = UART_WORDLENGTH_8B;
-  huart1.Init.StopBits = UART_STOPBITS_1;
-  huart1.Init.Parity = UART_PARITY_NONE;
-  huart1.Init.Mode = UART_MODE_TX_RX;
-  huart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
-  huart1.Init.OverSampling = UART_OVERSAMPLING_16;
-  if (HAL_UART_Init(&huart1) != HAL_OK)
-  {
-    Error_Handler();
-  }
+  USART_InitStruct.BaudRate = 9600;
+  USART_InitStruct.DataWidth = LL_USART_DATAWIDTH_8B;
+  USART_InitStruct.StopBits = LL_USART_STOPBITS_1;
+  USART_InitStruct.Parity = LL_USART_PARITY_NONE;
+  USART_InitStruct.TransferDirection = LL_USART_DIRECTION_TX_RX;
+  USART_InitStruct.HardwareFlowControl = LL_USART_HWCONTROL_NONE;
+  USART_InitStruct.OverSampling = LL_USART_OVERSAMPLING_16;
+  LL_USART_Init(USART1, &USART_InitStruct);
+  LL_USART_ConfigAsyncMode(USART1);
+  LL_USART_Enable(USART1);
   /* USER CODE BEGIN USART1_Init 2 */
 
   /* USER CODE END USART1_Init 2 */
@@ -440,21 +396,77 @@ static void MX_USART2_UART_Init(void)
 
   /* USER CODE END USART2_Init 0 */
 
+  LL_USART_InitTypeDef USART_InitStruct = {0};
+
+  LL_GPIO_InitTypeDef GPIO_InitStruct = {0};
+
+  /* Peripheral clock enable */
+  LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_USART2);
+  
+  LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_GPIOA);
+  /**USART2 GPIO Configuration  
+  PA2   ------> USART2_TX
+  PA3   ------> USART2_RX 
+  */
+  GPIO_InitStruct.Pin = LL_GPIO_PIN_2;
+  GPIO_InitStruct.Mode = LL_GPIO_MODE_ALTERNATE;
+  GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_HIGH;
+  GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
+  LL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  GPIO_InitStruct.Pin = LL_GPIO_PIN_3;
+  GPIO_InitStruct.Mode = LL_GPIO_MODE_FLOATING;
+  LL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  /* USART2 DMA Init */
+  
+  /* USART2_TX Init */
+  LL_DMA_SetDataTransferDirection(DMA1, LL_DMA_CHANNEL_7, LL_DMA_DIRECTION_MEMORY_TO_PERIPH);
+
+  LL_DMA_SetChannelPriorityLevel(DMA1, LL_DMA_CHANNEL_7, LL_DMA_PRIORITY_LOW);
+
+  LL_DMA_SetMode(DMA1, LL_DMA_CHANNEL_7, LL_DMA_MODE_NORMAL);
+
+  LL_DMA_SetPeriphIncMode(DMA1, LL_DMA_CHANNEL_7, LL_DMA_PERIPH_NOINCREMENT);
+
+  LL_DMA_SetMemoryIncMode(DMA1, LL_DMA_CHANNEL_7, LL_DMA_MEMORY_INCREMENT);
+
+  LL_DMA_SetPeriphSize(DMA1, LL_DMA_CHANNEL_7, LL_DMA_PDATAALIGN_BYTE);
+
+  LL_DMA_SetMemorySize(DMA1, LL_DMA_CHANNEL_7, LL_DMA_MDATAALIGN_BYTE);
+
+  /* USART2_RX Init */
+  LL_DMA_SetDataTransferDirection(DMA1, LL_DMA_CHANNEL_6, LL_DMA_DIRECTION_PERIPH_TO_MEMORY);
+
+  LL_DMA_SetChannelPriorityLevel(DMA1, LL_DMA_CHANNEL_6, LL_DMA_PRIORITY_LOW);
+
+  LL_DMA_SetMode(DMA1, LL_DMA_CHANNEL_6, LL_DMA_MODE_NORMAL);
+
+  LL_DMA_SetPeriphIncMode(DMA1, LL_DMA_CHANNEL_6, LL_DMA_PERIPH_NOINCREMENT);
+
+  LL_DMA_SetMemoryIncMode(DMA1, LL_DMA_CHANNEL_6, LL_DMA_MEMORY_INCREMENT);
+
+  LL_DMA_SetPeriphSize(DMA1, LL_DMA_CHANNEL_6, LL_DMA_PDATAALIGN_BYTE);
+
+  LL_DMA_SetMemorySize(DMA1, LL_DMA_CHANNEL_6, LL_DMA_MDATAALIGN_BYTE);
+
+  /* USART2 interrupt Init */
+  NVIC_SetPriority(USART2_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(),0, 0));
+  NVIC_EnableIRQ(USART2_IRQn);
+
   /* USER CODE BEGIN USART2_Init 1 */
 
   /* USER CODE END USART2_Init 1 */
-  huart2.Instance = USART2;
-  huart2.Init.BaudRate = 115200;
-  huart2.Init.WordLength = UART_WORDLENGTH_8B;
-  huart2.Init.StopBits = UART_STOPBITS_1;
-  huart2.Init.Parity = UART_PARITY_NONE;
-  huart2.Init.Mode = UART_MODE_TX_RX;
-  huart2.Init.HwFlowCtl = UART_HWCONTROL_NONE;
-  huart2.Init.OverSampling = UART_OVERSAMPLING_16;
-  if (HAL_UART_Init(&huart2) != HAL_OK)
-  {
-    Error_Handler();
-  }
+  USART_InitStruct.BaudRate = 115200;
+  USART_InitStruct.DataWidth = LL_USART_DATAWIDTH_8B;
+  USART_InitStruct.StopBits = LL_USART_STOPBITS_1;
+  USART_InitStruct.Parity = LL_USART_PARITY_NONE;
+  USART_InitStruct.TransferDirection = LL_USART_DIRECTION_TX_RX;
+  USART_InitStruct.HardwareFlowControl = LL_USART_HWCONTROL_NONE;
+  USART_InitStruct.OverSampling = LL_USART_OVERSAMPLING_16;
+  LL_USART_Init(USART2, &USART_InitStruct);
+  LL_USART_ConfigAsyncMode(USART2);
+  LL_USART_Enable(USART2);
   /* USER CODE BEGIN USART2_Init 2 */
 
   /* USER CODE END USART2_Init 2 */
@@ -472,9 +484,18 @@ static void MX_DMA_Init(void)
   LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_DMA1);
 
   /* DMA interrupt init */
+  /* DMA1_Channel4_IRQn interrupt configuration */
+  NVIC_SetPriority(DMA1_Channel4_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(),0, 0));
+  NVIC_EnableIRQ(DMA1_Channel4_IRQn);
   /* DMA1_Channel5_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(DMA1_Channel5_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(DMA1_Channel5_IRQn);
+  NVIC_SetPriority(DMA1_Channel5_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(),0, 0));
+  NVIC_EnableIRQ(DMA1_Channel5_IRQn);
+  /* DMA1_Channel6_IRQn interrupt configuration */
+  NVIC_SetPriority(DMA1_Channel6_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(),0, 0));
+  NVIC_EnableIRQ(DMA1_Channel6_IRQn);
+  /* DMA1_Channel7_IRQn interrupt configuration */
+  NVIC_SetPriority(DMA1_Channel7_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(),0, 0));
+  NVIC_EnableIRQ(DMA1_Channel7_IRQn);
 
 }
 
@@ -534,15 +555,41 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-void UARTWrite(USART_TypeDef* usart, const char* data, uint32_t length)
+
+char IsUARTWriteReady(USART_TypeDef* usart)
 {
-	LL_GPIO_TogglePin(GPIOB, LL_GPIO_PIN_13);
+	return LL_USART_IsActiveFlag_TC(usart);
+}
+
+
+void UARTWrite(USART_TypeDef* usart, DMA_TypeDef* dma, uint8_t dmaChannel, const char* data, uint32_t length)
+{
+	while(!IsUARTWriteReady(usart))
+	{
+
+	}
+
+	//LL_GPIO_TogglePin(GPIOB, LL_GPIO_PIN_12);
+	LL_DMA_DisableChannel(dma, dmaChannel);
+
+	// set length to be tranmitted
+	LL_DMA_SetDataLength(dma, dmaChannel, length );
+
+	LL_USART_EnableDMAReq_TX(usart);
+
+	// configure address to be transmitted by DMA
+	LL_DMA_ConfigAddresses(dma, dmaChannel, (uint32_t) data,
+			(uint32_t) LL_USART_DMA_GetRegAddr(usart), LL_DMA_GetDataTransferDirection(dma, dmaChannel));
+	LL_USART_Enable(usart);
+	// Enable DMA again
+	LL_DMA_EnableChannel(dma, dmaChannel);
+
 
 }
 
-void UARTRead(USART_TypeDef* usart, char* data, uint32_t length)
+void UARTRead(USART_TypeDef* usart, DMA_TypeDef* dma, uint8_t dmaChannel, char* data, uint32_t length)
 {
-/*	LL_GPIO_TogglePin(GPIOB, LL_GPIO_PIN_13);
+/*	LL_GPIO_TogglePin(GPIOB, LL_GPIO_PIN_12);
 	for (uint32_t i = 0; i < length; i++)
 	{
 		while (!LL_USART_IsActiveFlag_RXNE(usart))
@@ -559,10 +606,6 @@ void UARTRead(USART_TypeDef* usart, char* data, uint32_t length)
 */
 }
 
-void SerialPrintImpl(const char* message, uint32_t length)
-{
-//	UARTWrite(RADIO_UART, message, length);
-}
 
 void My_Error_Handler(void)
 {

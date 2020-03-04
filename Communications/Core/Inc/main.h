@@ -38,6 +38,7 @@ extern "C" {
 #include "stm32f1xx_ll_utils.h"
 #include "stm32f1xx_ll_pwr.h"
 #include "stm32f1xx_ll_spi.h"
+#include "stm32f1xx_ll_usart.h"
 #include "stm32f1xx.h"
 #include "stm32f1xx_ll_gpio.h"
 
@@ -54,6 +55,16 @@ extern "C" {
 /* Exported constants --------------------------------------------------------*/
 /* USER CODE BEGIN EC */
 
+#define RADIO_UART USART2
+#define GPS_UART USART1
+
+#define RADIO_DMA_CHANNEL_RX LL_DMA_CHANNEL_6
+#define RADIO_DMA_CHANNEL_TX LL_DMA_CHANNEL_7
+
+#define GPS_DMA_CHANNEL_TX LL_DMA_CHANNEL_4
+#define GPS_DMA_CHANNEL_RX LL_DMA_CHANNEL_5
+
+
 /* USER CODE END EC */
 
 /* Exported macro ------------------------------------------------------------*/
@@ -68,9 +79,12 @@ void Error_Handler(void);
 void CLog(const char* message);
 void My_Error_Handler(void);
 void DelayUS(uint16_t us);
-void SerialPrintImpl(const char* message, uint32_t length);
-void UARTWrite(USART_TypeDef* usart, const char* data, uint32_t length);
-void UARTRead(USART_TypeDef* usart, char* data, uint32_t length);
+
+char IsUARTWriteReady(USART_TypeDef* usart);
+
+
+void UARTWrite(USART_TypeDef* usart, DMA_TypeDef* dma, uint8_t dmaChannel, const char* data, uint32_t length);
+void UARTRead(USART_TypeDef* usart, DMA_TypeDef* dma, uint8_t dmaChannel, char* data, uint32_t length);
 
 void DMA1_Channel5_IRQHandler_USER();
 void USART1_IRQHandler_USER();

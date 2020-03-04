@@ -11,6 +11,10 @@ public:
 	Buffer(uint8_t* buf, uint32_t capacity, uint32_t offset = 0)
 		: m_Buf(buf), m_Capacity(capacity), m_Offset(offset) {}
 
+	Buffer(const Buffer& other, uint32_t offset = 0)
+		: m_Buf(other.m_Buf + offset), m_Capacity(other.m_Capacity - offset), m_Offset(0) {}
+
+
 	Buffer(const Buffer& other) : m_Buf(other.m_Buf), m_Capacity(other.m_Capacity), m_Offset(other.m_Offset) {}
 
 
@@ -34,5 +38,15 @@ private:
 	uint32_t m_Capacity;
 	uint32_t m_Offset;
 
+};
+
+template<std::size_t Cap>
+class StackBuffer : public Buffer
+{
+public:
+	StackBuffer() : Buffer(m_Buffer, Cap, 0) {}
+
+private:
+	uint8_t m_Buffer[Cap];
 };
 
