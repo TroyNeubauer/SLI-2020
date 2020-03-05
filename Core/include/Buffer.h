@@ -29,8 +29,12 @@ public:
 	inline uint8_t* Begin() { return m_Buf; }
 	inline const uint8_t* Begin() const { return m_Buf; }
 
-	template<typename T> T* As() { return reinterpret_cast<T*>(m_Buf); }
-	template<typename T> const T* As() const { return reinterpret_cast<T*>(m_Buf); }
+	template<typename T> T* As() { return reinterpret_cast<T*>(m_Buf + m_Offset); }
+	template<typename T> const T* As() const { return reinterpret_cast<T*>(m_Buf + m_Offset); }
+
+	template<typename T> T* WritePtr() { T* ptr = reinterpret_cast<T*>(m_Buf + m_Offset); m_Offset += sizeof(T); return ptr; }
+
+	inline uint32_t Offset() const { return m_Offset; }
 
 
 private:

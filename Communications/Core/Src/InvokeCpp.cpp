@@ -47,6 +47,8 @@ extern "C"
 		board.Info("Starting loop");
 		while(true)
 		{
+			board.Info("Looping...");
+			Lights(1);
 			board.Update();
 
 			if (HAL_GetTick() - last > 1250)
@@ -84,10 +86,10 @@ void SerialPrint(Formatter& formatter)
 		My_Error_Handler();
 	}
 
-	StackBuffer<sizeof(PacketHeader) + 256> buf;
-	Buffer dataBuffer(buf, sizeof(PacketHeader));
+	StackBuffer<sizeof(PacketHeader) + sizeof(MessagePacket) + 256> buf;
 
-	PacketHeader* header = buf.As<PacketHeader>();
+	PacketHeader* header = buf.WritePtr<PacketHeader>();
+	header->CRC32 = 1;
 	header->Destination = ModuleID::GROUND_STATION;
 	header->Forwarder = ModuleID::NONE;
 	header->From = ModuleID::STM32F103;
@@ -96,14 +98,15 @@ void SerialPrint(Formatter& formatter)
 	header->Type = PacketType::MESSAGE;
 	header->ID = 0;
 
-	MessagePacket* messagePacket = dataBuffer.As<MessagePacket>();
+	MessagePacket* messagePacket = buf.WritePtr<MessagePacket>();
 	messagePacket->Level = LL_INFO;
 	messagePacket->MessageLength = formatter.Size();
-	char* destMessage = dataBuffer.As<char>() + sizeof(MessagePacket);
+
+	char* destMessage = buf.As<char>();
 	memcpy(destMessage, formatter.Data(), formatter.Size());
 
 
-	uint32_t length = sizeof(PacketHeader) + sizeof(MessagePacket) + formatter.Size();
+	uint32_t length = buf.Offset() + formatter.Size();
 	UARTWrite(RADIO_UART, DMA1, RADIO_DMA_CHANNEL_TX, reinterpret_cast<const char*>(buf.Begin()), length);
 
 

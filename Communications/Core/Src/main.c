@@ -73,6 +73,20 @@ static void MX_TIM1_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
+void Lights(int count)
+{
+	LL_GPIO_ResetOutputPin(GPIOB, LL_GPIO_PIN_12);
+	for (int i = 0; i < count; i++)
+	{
+		HAL_Delay(150);
+		LL_GPIO_TogglePin(GPIOB, LL_GPIO_PIN_12);
+		HAL_Delay(100);
+		LL_GPIO_TogglePin(GPIOB, LL_GPIO_PIN_12);
+	}
+	HAL_Delay(1000);
+
+}
+
 /* USER CODE END 0 */
 
 /**
@@ -120,13 +134,6 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-	LL_GPIO_TogglePin(GPIOB, LL_GPIO_PIN_13);
-	HAL_Delay(500);
-
-	LL_GPIO_TogglePin(GPIOB, LL_GPIO_PIN_13);
-	HAL_Delay(500);
-
-	LL_GPIO_TogglePin(GPIOB, LL_GPIO_PIN_13);
 
 	CLog("Invoking C++ code");
 	InvokeCpp(RADIO_UART, GPS_UART);
@@ -135,10 +142,6 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-		const char* message = "0123456789";
-		LL_GPIO_TogglePin(GPIOB, LL_GPIO_PIN_13);
-		UARTWrite(RADIO_UART, DMA1, RADIO_DMA_CHANNEL_TX, message, strlen(message));
-		//LL_USART_EnableIT_TC(RADIO_UART);
 
 	// how to start sending with DMA?!
 	}
@@ -583,6 +586,16 @@ void UARTWrite(USART_TypeDef* usart, DMA_TypeDef* dma, uint8_t dmaChannel, const
 	LL_USART_Enable(usart);
 	// Enable DMA again
 	LL_DMA_EnableChannel(dma, dmaChannel);
+
+/*	for (int i = 0; i < length; i++)
+	{
+		while (!LL_USART_IsActiveFlag_TXE(usart))
+		{
+
+		}
+		LL_USART_TransmitData8(usart, data[i]);
+
+	}*/
 
 
 }
