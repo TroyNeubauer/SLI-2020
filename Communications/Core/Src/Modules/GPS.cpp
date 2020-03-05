@@ -68,7 +68,7 @@ void GPS::Update()
 
 }
 
-void GPS::RecievePacket(const PacketHeader &header, Buffer &packet)
+void GPS::RecievePacket(PacketBuffer &packet)
 {
 
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Module.h"
+#include "Buffer.h"
 
 #include "stm32f2xx_hal.h"
 #include "stm32f2xx_hal_spi.h"
@@ -16,7 +17,7 @@ public:
 	virtual void Update() override;
 
 private:
-	virtual void RoutePacket(const PacketHeader& header, Buffer& packet);
+	virtual void RoutePacket(PacketBuffer& packet);
 
 
 };

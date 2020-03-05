@@ -11,7 +11,7 @@ public:
 	GPS(SLICoreModule* core, USART_TypeDef* gps) : SLIModule(core, ModuleID::GPS), m_GPSUART(gps) {}
 	virtual void Init();
 	virtual void Update();
-	virtual void RecievePacket(const PacketHeader& header, Buffer& packet);
+	virtual void RecievePacket(PacketBuffer& packet);
 
 	//Sends a command to the GPS after adding the $ character at the beginning and adding the calculated checksum at the end
 	void NMEASend(const char* command);

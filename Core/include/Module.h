@@ -8,6 +8,8 @@
 
 #include "Formatter.h"
 
+#include "Packet.h"
+
 class PacketBuffer;
 
 enum class ModuleID
@@ -18,15 +20,6 @@ enum class ModuleID
 };
 
 const char* GetModuleIDName(ModuleID id);
-
-
-using LogLevelType = uint8_t;
-
-constexpr LogLevelType LL_TRACE = 0;
-constexpr LogLevelType LL_INFO = 1;
-constexpr LogLevelType LL_WARN = 2;
-constexpr LogLevelType LL_ERROR = 3;
-
 
 //Implemented by each parent-module
 extern void SerialPrint(Formatter& formatter, LogLevelType level);

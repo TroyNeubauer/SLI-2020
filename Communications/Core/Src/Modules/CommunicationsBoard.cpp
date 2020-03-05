@@ -1,6 +1,7 @@
 #include "Modules/CommunicationsBoard.h"
 #include "Packet.h"
 #include "Module.h"
+#include "Core.h"
 
 #include "main.h"
 
@@ -32,15 +33,15 @@ void CommunicationsBoard::Update()
 
 }
 
-void CommunicationsBoard::RoutePacket(const PacketHeader &header, Buffer &packet)
+void CommunicationsBoard::RoutePacket(PacketBuffer& packet)
 {
-	if (header.Destination == ModuleID::GROUND_STATION)
+	PacketHeader* header = packet.Header();
+	if (header->Destination == ModuleID::GROUND_STATION)
 	{
-		const char* buffer = reinterpret_cast<const char*>(&header);
-		UARTWrite(m_RadioUART, DMA1, RADIO_DMA_CHANNEL_TX, buffer, sizeof(header) + SizeOfPacketData(header, packet));
+		UARTWrite(m_RadioUART, DMA1, RADIO_DMA_CHANNEL_TX, (char*) packet.Begin(), packet.Offset());
 
 	}
-	else if (header.Destination == ModuleID::STM32F205)
+	else if (header->Destination == ModuleID::STM32F205)
 	{
 		//Forward to the sensor board
 
@@ -49,7 +50,7 @@ void CommunicationsBoard::RoutePacket(const PacketHeader &header, Buffer &packet
 	{
 		//TODO: handle error
 		DefaultFormatter formatter;
-		formatter << "Unknown destination " << static_cast<uint32_t>(header.Destination) << ", Corrupt packet?";
+		formatter << "Unknown destination " << static_cast<uint32_t>(header->Destination) << ", Corrupt packet?";
 		Warn(formatter);
 	}
 }

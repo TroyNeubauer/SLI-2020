@@ -2,8 +2,6 @@
 
 #include <cstdint>
 
-#include "Module.h"
-
 using PacketTypeValue = uint8_t;
 
 namespace PacketType {
@@ -50,6 +48,7 @@ namespace StatusValue {
 
 }
 
+enum class ModuleID;
 
 struct PacketHeader
 {
@@ -68,7 +67,7 @@ struct PacketHeader
 
 };
 
-static_assert(offsetof(PacketHeader, CRC32) == 0, "CRC must start at offset 0");
+//static_assert(offset_of(PacketHeader, CRC32) == 0, "CRC must start at offset 0");
 
 
 const int MAX_PACKET_DATA_SIZE = 256;
@@ -110,6 +109,14 @@ struct DataPacket_STMF205
 };
 
 const uint32_t MAX_MESSAGE_LENGTH = 256;
+
+using LogLevelType = uint8_t;
+
+constexpr LogLevelType LL_TRACE = 0;
+constexpr LogLevelType LL_INFO = 1;
+constexpr LogLevelType LL_WARN = 2;
+constexpr LogLevelType LL_ERROR = 3;
+
 
 struct MessagePacket
 {

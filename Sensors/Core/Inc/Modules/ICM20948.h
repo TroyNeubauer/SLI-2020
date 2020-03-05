@@ -29,7 +29,7 @@ public:
 		}
 	}
 
-	virtual void RecievePacket(const PacketHeader& header, Buffer& packet)
+	virtual void RecievePacket(PacketBuffer& packet)
 	{
 
 	}

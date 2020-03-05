@@ -52,6 +52,7 @@ char initStage = INIT_STAGE_NONE;
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
+CRC_HandleTypeDef hcrc;
 
 TIM_HandleTypeDef htim1;
 
@@ -67,6 +68,7 @@ static void MX_USART1_UART_Init(void);
 static void MX_SPI1_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_TIM1_Init(void);
+static void MX_CRC_Init(void);
 /* USER CODE BEGIN PFP */
 /* USER CODE END PFP */
 
@@ -125,6 +127,7 @@ int main(void)
   MX_SPI1_Init();
   MX_USART2_UART_Init();
   MX_TIM1_Init();
+  MX_CRC_Init();
   /* USER CODE BEGIN 2 */
 	CLog("Peripheral initialization complete");
 	initStage = INIT_STAGE_PERHIPERALS;
@@ -136,7 +139,7 @@ int main(void)
   /* USER CODE BEGIN WHILE */
 
 	CLog("Invoking C++ code");
-	InvokeCpp(RADIO_UART, GPS_UART);
+	InvokeCpp(RADIO_UART, GPS_UART, &hcrc);
 	while (1)
 	{
     /* USER CODE END WHILE */
@@ -147,7 +150,6 @@ int main(void)
 	}
   /* USER CODE END 3 */
 }
-
 
 /**
   * @brief System Clock Configuration
@@ -194,6 +196,32 @@ void SystemClock_Config(void)
   {
     Error_Handler();  
   };
+}
+
+/**
+  * @brief CRC Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_CRC_Init(void)
+{
+
+  /* USER CODE BEGIN CRC_Init 0 */
+
+  /* USER CODE END CRC_Init 0 */
+
+  /* USER CODE BEGIN CRC_Init 1 */
+
+  /* USER CODE END CRC_Init 1 */
+  hcrc.Instance = CRC;
+  if (HAL_CRC_Init(&hcrc) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN CRC_Init 2 */
+
+  /* USER CODE END CRC_Init 2 */
+
 }
 
 /**

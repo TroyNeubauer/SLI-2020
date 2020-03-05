@@ -1,4 +1,4 @@
-#include "..\include\Buffer.h"
+#include "Buffer.h"
 #include "gspch.h"
 
 #include "Buffer.h"
@@ -21,5 +21,15 @@ uint32_t PacketBuffer::CalculateCRC32()
 {
 	uint8_t* begin = m_Buf + sizeof(m_Header->CRC32);
 	uint8_t* end = m_Buf + m_Offset;
+	std::size_t length = end - begin;
+	int toAdd = length % 4;
+	if (toAdd != 0)
+	{
+		for (int i = 0; i < toAdd; i++)
+		{
+			*end = 0x00;
+			end++;
+		}
+	}
 	return CRC32Impl(begin, end - begin);
 }

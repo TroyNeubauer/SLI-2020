@@ -48,7 +48,7 @@ void SensorsBoard::Update()
 }
 
 
-void SensorsBoard::RoutePacket(const PacketHeader& header, Buffer& packet)
+void SensorsBoard::RoutePacket(PacketBuffer& packet)
 {
 
 }

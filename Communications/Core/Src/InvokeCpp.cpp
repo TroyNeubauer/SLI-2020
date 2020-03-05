@@ -1,6 +1,7 @@
 
 
 #include "stm32f1xx.h"
+#include "stm32f1xx_hal_crc.h"
 
 #include <cstdlib>
 #include <cstdio>
@@ -18,6 +19,7 @@ CommunicationsBoard* boardPtr = nullptr;
 
 USART_TypeDef* s_RadioUart = nullptr;
 USART_TypeDef* s_GPSUart = nullptr;
+CRC_HandleTypeDef* s_CRC32 = nullptr;
 
 GPS* gpsPtr = nullptr;
 
@@ -30,12 +32,14 @@ extern "C"
 {
 	SizedFormatter<256> cLog;
 
-	void InvokeCpp(USART_TypeDef* radioUart, USART_TypeDef* GPSUart)
+	void InvokeCpp(USART_TypeDef* radioUart, USART_TypeDef* GPSUart, CRC_HandleTypeDef* crc32)
 	{
-
-		int last = HAL_GetTick();
 		s_RadioUart = radioUart;
 		s_GPSUart = GPSUart;
+		s_CRC32 = crc32;
+
+		int last = HAL_GetTick();
+
 		SerialPrint(cLog, LL_INFO);
 
 		CommunicationsBoard board(radioUart, GPSUart);
@@ -80,6 +84,12 @@ extern "C"
 
 }
 
+uint32_t CRC32Impl(const uint8_t* data, std::size_t bytes)
+{
+	uint32_t result = HAL_CRC_Calculate(s_CRC32, (uint32_t*) data, bytes);
+	return ~result;
+}
+
 void SerialPrint(Formatter& formatter, LogLevelType level)
 {
 	SerialPrint(std::move(formatter), level);
@@ -95,8 +105,7 @@ void SerialPrint(Formatter&& formatter, LogLevelType level)
 
 	StackBuffer<sizeof(PacketHeader) + sizeof(MessagePacket) + 256> buf;
 
-	PacketHeader* header = buf.WritePtr<PacketHeader>();
-	header->CRC32 = 1;
+	PacketHeader* header = buf.Header();
 	header->Destination = ModuleID::GROUND_STATION;
 	header->Forwarder = ModuleID::NONE;
 	header->From = ModuleID::STM32F103;
@@ -105,12 +114,14 @@ void SerialPrint(Formatter&& formatter, LogLevelType level)
 	header->Type = PacketType::MESSAGE;
 	header->ID = 0;
 
-	MessagePacket* messagePacket = buf.WritePtr<MessagePacket>();
+	MessagePacket* messagePacket = buf.Ptr<MessagePacket>();
 	messagePacket->Level = level;
 	messagePacket->MessageLength = formatter.Size();
 
-	char* destMessage = buf.As<char>();
+	char* destMessage = buf.As<char>(formatter.Size());
 	memcpy(destMessage, formatter.Data(), formatter.Size());
+
+	header->CRC32 = buf.CalculateCRC32();
 
 
 	uint32_t length = buf.Offset() + formatter.Size();
