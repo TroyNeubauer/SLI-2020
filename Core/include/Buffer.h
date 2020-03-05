@@ -27,7 +27,9 @@ public:
 	inline uint32_t Offset() const { return m_Offset; }
 
 	inline PacketHeader* Header() { return m_Header; }
-	virtual ~Buffer() {}
+	virtual ~PacketBuffer() {}
+
+	uint32_t CalculateCRC32();
 
 
 private:
@@ -40,10 +42,10 @@ private:
 
 
 template<std::size_t Cap>
-class StackBuffer : public Buffer
+class StackBuffer : public PacketBuffer
 {
 public:
-	StackBuffer() : Buffer(m_Buffer, Cap) {}
+	StackBuffer() : PacketBuffer(m_Buffer, Cap) {}
 
 private:
 	uint8_t m_Buffer[Cap];

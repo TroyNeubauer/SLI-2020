@@ -29,6 +29,7 @@ constexpr LogLevelType LL_ERROR = 3;
 
 
 //Implemented by each parent-module
+extern void SerialPrint(Formatter& formatter, LogLevelType level);
 extern void SerialPrint(Formatter&& formatter, LogLevelType level);
 extern const char* GetParentModuleName();
 

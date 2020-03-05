@@ -6,6 +6,8 @@
 
 #include <algorithm>
 
+#include "Buffer.h"
+
 SLICoreModule::SLICoreModule(ModuleID self) : m_ModuleID(self)
 {
 	std::fill(m_ContainedModules.begin(), m_ContainedModules.end(), nullptr);
@@ -44,8 +46,8 @@ void SLICoreModule::RecievePacket(PacketBuffer& packet)
 //Delivers a packet to its local destination
 void SLICoreModule::DeliverLocalPacket(PacketBuffer& packet)
 {
-	int intID = static_cast<int>(header.Destination);
-	if (intID >= static_cast<int>(ModuleID::MAX_MODULE_ID) || intID < 0 || !HasModule(header.Destination))
+	int intID = static_cast<int>(packet.Header()->Destination);
+	if (intID >= static_cast<int>(ModuleID::MAX_MODULE_ID) || intID < 0 || !HasModule(packet.Header()->Destination))
 	{
 		//TODO. Fail
 	}
