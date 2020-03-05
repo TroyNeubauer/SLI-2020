@@ -7,7 +7,9 @@
 
 class Readable
 {
-	virtual bool Read(void* dest, std::size_t bytes);
+public:
+	virtual bool Read(void* dest, std::size_t bytes) = 0;
+	virtual ~Readable() {}
 };
 
 
@@ -48,6 +50,8 @@ public:
 	template<typename T> T* WritePtr() { T* ptr = reinterpret_cast<T*>(m_Buf + m_Offset); m_Offset += sizeof(T); return ptr; }
 
 	inline uint32_t Offset() const { return m_Offset; }
+
+	virtual ~Buffer() {}
 
 
 private:
