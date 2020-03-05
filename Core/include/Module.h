@@ -9,6 +9,7 @@
 #include "Formatter.h"
 
 #include "Packet.h"
+#include "Module.h"
 
 class PacketBuffer;
 
@@ -49,7 +50,7 @@ public:
 };
 
 class SLICoreModule;
-class PacketHeader;
+struct PacketHeader;
 
 //An SLI module represents a sensor or processor that can send and receive packets
 //Eg. the radio, GPS, altimeter, etc
