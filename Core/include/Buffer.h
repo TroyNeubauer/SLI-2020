@@ -5,7 +5,13 @@
 #include <cstdint>
 #include <cstdlib>
 
-class Buffer
+class Readable
+{
+	virtual bool Read(void* dest, std::size_t bytes);
+};
+
+
+class Buffer : public Readable
 {
 public:
 	Buffer(uint8_t* buf, uint32_t capacity, uint32_t offset = 0)
@@ -15,15 +21,23 @@ public:
 
 
 	template<typename T>
-	void Read(T& value)
+	bool Read(T& value)
 	{
-		SLI_ASSERT(m_Offset + sizeof(T) > m_Capacity, "Buffer read out exceeds capacity!");
-		memcpy(&value, m_Buf + m_Offset);
-		m_Offset += sizeof(T);
+		if (!Read(&value, sizeof(T)))
+		{
+			return false;
+		}
+		else
+		{
+			return true;
+		}
 	}
 
 	inline uint8_t* Begin() { return m_Buf; }
 	inline const uint8_t* Begin() const { return m_Buf; }
+
+	virtual bool Read(void* dest, std::size_t bytes);
+
 
 	template<typename T> T* As() { return reinterpret_cast<T*>(m_Buf); }
 	template<typename T> const T* As() const { return reinterpret_cast<T*>(m_Buf); }
@@ -35,4 +49,3 @@ private:
 	uint32_t m_Offset;
 
 };
-

@@ -31,8 +31,8 @@ constexpr LogLevelType LL_ERROR = 3;
 Formatter BeginMessage(const char* device, LogLevelType level);
 
 //Implemented by each parent-module
-void SerialPrint(Formatter& formatter);
-const char* GetParentModuleName();
+extern void SerialPrint(Formatter& formatter);
+extern const char* GetParentModuleName();
 
 
 class SLILogable
@@ -129,4 +129,6 @@ protected:
 private:
 	ModuleID m_ModuleID;
 };
+
+extern SLICoreModule* GetDefaultCoreModule();
 
