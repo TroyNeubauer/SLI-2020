@@ -28,10 +28,8 @@ constexpr LogLevelType LL_WARN = 2;
 constexpr LogLevelType LL_ERROR = 3;
 
 
-Formatter BeginMessage(const char* device, LogLevelType level);
-
 //Implemented by each parent-module
-extern void SerialPrint(Formatter& formatter);
+extern void SerialPrint(Formatter&& formatter, LogLevelType level);
 extern const char* GetParentModuleName();
 
 
@@ -42,13 +40,18 @@ public:
 
 	virtual ~SLILogable() {}
 
-	inline Formatter BeginDeviceMessage(LogLevelType level) { return BeginMessage(GetModuleIDName(GetID()), level); }
-	void SendDebugMessage(Formatter& formatter);
+	void SendDebugMessage(Formatter&& formatter, LogLevelType level);
 
-	void Trace(const char* message);
-	void Info(const char* message);
-	void Warn(const char* message);
-	void Error(const char* message);
+	void Trace(Formatter&& formatter);
+	void Info(Formatter&& formatter);
+	void Warn(Formatter&& formatter);
+	void Error(Formatter&& formatter);
+
+	inline void Trace(Formatter& formatter) { Trace(std::move(formatter)); }
+	inline void Info(Formatter& formatter) { Info(std::move(formatter)); }
+	inline void Warn(Formatter& formatter) { Warn(std::move(formatter)); }
+	inline void Error(Formatter& formatter) { Error(std::move(formatter)); }
+
 };
 
 class SLICoreModule;
@@ -107,8 +110,6 @@ public:
 
 
 	virtual ~SLICoreModule() {}
-
-	inline Formatter BeginDeviceMessage(LogLevelType level) { return BeginMessage(GetModuleIDName(m_ModuleID), level); }
 
 protected:
 	void UpdateLocalModules();

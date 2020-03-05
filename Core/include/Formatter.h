@@ -36,6 +36,10 @@ class Formatter
 {
 public:
 	inline Formatter(char* buf, std::size_t capacity) : m_Buf(buf), m_Capacity(capacity) {}
+	inline Formatter(const char* string) : m_Buf(const_cast<char*>(string)), m_Capacity(strlen(string) + 1)
+	{
+		m_Offset = strlen(string);
+	}
 
 	const char* c_str();
 	inline operator const char*() { return c_str(); }

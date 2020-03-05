@@ -21,7 +21,8 @@ USART_TypeDef* s_GPSUart = nullptr;
 
 GPS* gpsPtr = nullptr;
 
-void SerialPrint(Formatter& formatter);
+void SerialPrint(Formatter& formatter, LogLevelType level);
+void SerialPrint(Formatter&& formatter, LogLevelType level);
 
 const char* GetParentModuleName();
 
@@ -35,7 +36,7 @@ extern "C"
 		int last = HAL_GetTick();
 		s_RadioUart = radioUart;
 		s_GPSUart = GPSUart;
-		SerialPrint(cLog);
+		SerialPrint(cLog, LL_INFO);
 
 		CommunicationsBoard board(radioUart, GPSUart);
 		boardPtr = &board;
@@ -79,7 +80,13 @@ extern "C"
 
 }
 
-void SerialPrint(Formatter& formatter)
+void SerialPrint(Formatter& formatter, LogLevelType level)
+{
+	SerialPrint(std::move(formatter), level);
+}
+
+
+void SerialPrint(Formatter&& formatter, LogLevelType level)
 {
 	if (s_RadioUart == nullptr)
 	{
@@ -99,7 +106,7 @@ void SerialPrint(Formatter& formatter)
 	header->ID = 0;
 
 	MessagePacket* messagePacket = buf.WritePtr<MessagePacket>();
-	messagePacket->Level = LL_INFO;
+	messagePacket->Level = level;
 	messagePacket->MessageLength = formatter.Size();
 
 	char* destMessage = buf.As<char>();
@@ -116,7 +123,7 @@ void SLIAssertFailed(const char* message)
 {
 	SizedFormatter<256> formatter;
 	formatter << "ASSERTION FAILED!!\n" << message;
-	SerialPrint(formatter);
+	SerialPrint(formatter, LL_ERROR);
 	My_Error_Handler();
 }
 

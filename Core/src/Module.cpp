@@ -85,9 +85,9 @@ void SLICoreModule::AddModule(SLIModule* module)
 {
 	SLI_FASSERT(m_ContainedModules[module->GetIntID()] == nullptr, f << "Module already exists! " << GetModuleIDName(module->GetID()));
 	m_ContainedModules[module->GetIntID()] = module;
-	Formatter formatter = BeginDeviceMessage(LL_INFO);
+	DefaultFormatter formatter;
 	formatter << "Added module! ID " << module->GetIntID();
-	SendDebugMessage(formatter);
+	Info(formatter);
 	module->Init();
 
 }
@@ -125,40 +125,32 @@ Formatter BeginMessage(const char* device, LogLevelType level)
 }
 
 
-void SLILogable::SendDebugMessage(Formatter& formatter)
+void SLILogable::SendDebugMessage(Formatter&& formatter, LogLevelType level)
 {
-	SerialPrint(formatter);
+	SerialPrint(std::move(formatter), level);
 }
 
 
-void SLILogable::Trace(const char* message)
+void SLILogable::Trace(Formatter&& formatter)
 {
-	Formatter formatter = BeginDeviceMessage(LL_TRACE);
-	formatter << message << '\n';
-	SendDebugMessage(formatter);
+	SendDebugMessage(std::move(formatter), LL_TRACE);
 }
 
-void SLILogable::Info(const char* message)
+void SLILogable::Info(Formatter&& formatter)
 {
-	Formatter formatter = BeginDeviceMessage(LL_INFO);
-	formatter << message << '\n';
-	SendDebugMessage(formatter);
+	SendDebugMessage(std::move(formatter), LL_INFO);
 
 }
 
-void SLILogable::Warn(const char* message)
+void SLILogable::Warn(Formatter&& formatter)
 {
-	Formatter formatter = BeginDeviceMessage(LL_WARN);
-	formatter << message << '\n';
-	SendDebugMessage(formatter);
+	SendDebugMessage(std::move(formatter), LL_WARN);
 
 }
 
-void SLILogable::Error(const char* message)
+void SLILogable::Error(Formatter&& formatter)
 {
-	Formatter formatter = BeginDeviceMessage(LL_ERROR);
-	formatter << message << '\n';
-	SendDebugMessage(formatter);
+	SendDebugMessage(std::move(formatter), LL_ERROR);
 }
 
 

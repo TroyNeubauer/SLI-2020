@@ -48,9 +48,9 @@ void CommunicationsBoard::RoutePacket(const PacketHeader &header, Buffer &packet
 	else
 	{
 		//TODO: handle error
-		Formatter formatter = BeginDeviceMessage(LL_ERROR);
+		DefaultFormatter formatter;
 		formatter << "Unknown destination " << static_cast<uint32_t>(header.Destination) << ", Corrupt packet?";
-		SendDebugMessage(formatter);
+		Warn(formatter);
 	}
 }
 
