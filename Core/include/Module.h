@@ -6,9 +6,9 @@
 #include <array>
 #include <cstddef>
 
-
-#include "Buffer.h"
 #include "Formatter.h"
+
+class PacketBuffer;
 
 enum class ModuleID
 {
@@ -66,11 +66,11 @@ public:
 
 	virtual void Init() = 0;
 	virtual void Update() = 0;
-	virtual void RecievePacket(const PacketHeader& header, Buffer& packet) = 0;
+	virtual void RecievePacket(PacketBuffer& packet) = 0;
 	virtual inline ModuleID GetID() const { return m_ModuleID; }
 
 	inline int32_t GetIntID() const { return static_cast<int32_t>(m_ModuleID); }
-	void SendPacket(const PacketHeader& header, Buffer& packet);
+	void SendPacket(PacketBuffer& packet);
 	void Log(const char* message);
 
 	virtual ~SLIModule() {}
@@ -94,12 +94,12 @@ public:
 	virtual void Update() = 0;
 
 	//Called by modules to send packets
-	virtual void SendPacket(const PacketHeader& header, Buffer& packet);
+	virtual void SendPacket(PacketBuffer& packet);
 
 	//Called by the user in Update to handle when a packet is received
 	//Manages calling RecievePacket on the local module or RoutePacket
 	//to get the packet to its final destination
-	virtual void RecievePacket(const PacketHeader& header, Buffer& packet);
+	virtual void RecievePacket(PacketBuffer& packet);
 
 	//Returns true if this module is directly connected to this device
 	bool HasModule(ModuleID id);
@@ -116,10 +116,10 @@ protected:
 
 private:
 	//Re-sends a packet across the wire/radio to the intended recipient
-	virtual void RoutePacket(const PacketHeader& header, Buffer& packet) = 0;
+	virtual void RoutePacket(PacketBuffer& packet) = 0;
 
 	//Delivers a packet to its local destination
-	void DeliverLocalPacket(const PacketHeader& header, Buffer& packet);
+	void DeliverLocalPacket(PacketBuffer& packet);
 
 
 protected:

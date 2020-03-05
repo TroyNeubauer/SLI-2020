@@ -11,38 +11,38 @@ SLICoreModule::SLICoreModule(ModuleID self) : m_ModuleID(self)
 	std::fill(m_ContainedModules.begin(), m_ContainedModules.end(), nullptr);
 }
 
-void SLIModule::SendPacket(const PacketHeader& header, Buffer& packet)
+void SLIModule::SendPacket(PacketBuffer& packet)
 {
-	m_CoreModule->SendPacket(header, packet);
+	m_CoreModule->SendPacket(packet);
 }
 
-void SLICoreModule::SendPacket(const PacketHeader& header, Buffer& packet)
+void SLICoreModule::SendPacket(PacketBuffer& packet)
 {
-	if (HasModule(header.Destination))
+	if (HasModule(packet.Header()->Destination))
 	{
-		DeliverLocalPacket(header, packet);
+		DeliverLocalPacket(packet);
 	}
 	else
 	{
-		RoutePacket(header, packet);
+		RoutePacket(packet);
 	}
 }
 
-void SLICoreModule::RecievePacket(const PacketHeader& header, Buffer& packet)
+void SLICoreModule::RecievePacket(PacketBuffer& packet)
 {
-	if (HasModule(header.Destination))
+	if (HasModule(packet.Header()->Destination))
 	{
-		DeliverLocalPacket(header, packet);
+		DeliverLocalPacket(packet);
 	}
 	else
 	{
-		RoutePacket(header, packet);
+		RoutePacket(packet);
 	}
 }
 
 
 //Delivers a packet to its local destination
-void SLICoreModule::DeliverLocalPacket(const PacketHeader& header, Buffer& packet)
+void SLICoreModule::DeliverLocalPacket(PacketBuffer& packet)
 {
 	int intID = static_cast<int>(header.Destination);
 	if (intID >= static_cast<int>(ModuleID::MAX_MODULE_ID) || intID < 0 || !HasModule(header.Destination))
@@ -51,7 +51,7 @@ void SLICoreModule::DeliverLocalPacket(const PacketHeader& header, Buffer& packe
 	}
 	else
 	{
-		m_ContainedModules[intID]->RecievePacket(header, packet);
+		m_ContainedModules[intID]->RecievePacket(packet);
 	}
 }
 

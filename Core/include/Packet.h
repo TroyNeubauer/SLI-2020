@@ -76,9 +76,9 @@ class Buffer;
 const int MAX_PACKET_DATA_SIZE = 256;
 
 //Returns the number of bytes of data in buffer
-int16_t SizeOfPacketData(const PacketHeader& header, const Buffer& buffer);
+int16_t SizeOfPacketData(const PacketBuffer& buffer);
 
-uint32_t CalculateCRC32(const PacketHeader& header, const Buffer& buffer);
+uint32_t CalculateCRC32(const PacketBuffer& buffer);
 
 uint32_t CRC32Impl(const uint8_t* data, std::size_t bytes);
 

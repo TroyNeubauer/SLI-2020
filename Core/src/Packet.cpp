@@ -2,9 +2,10 @@
 #include "Packet.h"
 
 
-int16_t SizeOfPacketData(const PacketHeader& header, const Buffer& packet)
+int16_t SizeOfPacketData(const PacketBuffer& packet)
 {
-	switch (header.Type)
+	PacketHeader* header = packet.Header();
+	switch (header->Type)
 	{
 		case PacketType::INIT:
 			return sizeof(InitPacket);
@@ -14,7 +15,7 @@ int16_t SizeOfPacketData(const PacketHeader& header, const Buffer& packet)
 
 		case PacketType::DATA:
 		{
-			if (header.From == ModuleID::GPS)
+			if (header->From == ModuleID::GPS)
 			{
 				uint16_t sentenceLength = packet.As<DataPacket_GPS>()->NMEASentenceLength;
 				if (sentenceLength > MAX_NMEA_LENGTH)
@@ -24,11 +25,11 @@ int16_t SizeOfPacketData(const PacketHeader& header, const Buffer& packet)
 
 				return sizeof(DataPacket_GPS) + sentenceLength;
 			}
-			else if (header.From == ModuleID::STM32F103)
+			else if (header->From == ModuleID::STM32F103)
 			{
 				return sizeof(DataPacket_STMF103);
 			}
-			else if (header.From == ModuleID::STM32F205)
+			else if (header->From == ModuleID::STM32F205)
 			{
 				return sizeof(DataPacket_STMF205);
 			}
@@ -63,14 +64,14 @@ int16_t SizeOfPacketData(const PacketHeader& header, const Buffer& packet)
 	}
 }
 
-uint32_t CalculateCRC32(const PacketHeader& header, const Buffer& buffer)
+uint32_t CalculateCRC32(const PacketHeader* header, const PacketBuffer& buffer)
 {
-	SLI_ASSERT(reinterpret_cast<const uint8_t*>(&header) + sizeof(header) == buffer.Begin(), "Packet is non contigious!");
+	SLI_ASSERT(reinterpret_cast<const uint8_t*>(header) == buffer.Begin(), "Packet is non contigious!");
 	//Don't count the CRC32 when calculating the checksum
-	const uint8_t* begin = reinterpret_cast<const uint8_t*>(&header) + sizeof(header.CRC32);
+	const uint8_t* begin = reinterpret_cast<const uint8_t*>(header) + sizeof(header->CRC32);
 
 	uint32_t size = SizeOfPacketData(header, buffer);
-	const uint8_t* end = buffer.Begin() + size;
+	const uint8_t* end = buffer.Begin() + sizeof(PacketHeader) + size;
 	return CRC32Impl(begin, end - begin);
 }
 

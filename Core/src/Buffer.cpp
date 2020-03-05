@@ -2,7 +2,7 @@
 
 #include "Buffer.h"
 
-bool Buffer::Read(void* dest, std::size_t bytes)
+bool PacketBuffer::Read(void* dest, std::size_t bytes)
 {
 	if (m_Offset + bytes > m_Capacity)
 	{
