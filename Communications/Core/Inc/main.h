@@ -80,6 +80,8 @@ void CLog(const char* message);
 void My_Error_Handler(void);
 void DelayUS(uint16_t us);
 
+void Lights(int count);
+
 char IsUARTWriteReady(USART_TypeDef* usart);
 
 

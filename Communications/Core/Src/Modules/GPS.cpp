@@ -11,7 +11,7 @@ uint8_t gpsBuf[128];
 
 void GPS::Init()
 {
-	Trace("GPS::Init");
+/*	Trace("GPS::Init");
 	NMEASend("PMTK251,115200");
 	Trace("Sent GPS baud rate change command");
 
