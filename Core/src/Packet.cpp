@@ -1,41 +1,6 @@
 
-
 #include "Packet.h"
 
-
-/*
-struct InitPacket
-{
-	uint32_t Reserved = 0xDEADBEEF;
-};
-
-struct StatusPacket
-{
-	StatusTypeValue Status;
-};
-
-struct DataPacket_GPS
-{
-	uint16_t NMEASentenceLength;//How many bytes the string written after this struct is
-};
-
-struct DataPacket_STMF103
-{
-
-};
-
-struct DataPacket_STMF205
-{
-
-};
-
-struct MessagePacket
-{
-	LogLevelType Level;
-	uint16_t MessageLength;//How many bytes the string written after this struct is
-};
-
-*/
 
 int16_t SizeOfPacketData(const PacketHeader& header, const Buffer& packet)
 {
@@ -100,9 +65,9 @@ int16_t SizeOfPacketData(const PacketHeader& header, const Buffer& packet)
 
 uint32_t CalculateCRC32(const PacketHeader& header, const Buffer& buffer)
 {
-	SLI_ASSERT(&header + sizeof(header) == buffer.Begin(), "Packet is non contigious!");
+	SLI_ASSERT(reinterpret_cast<const uint8_t*>(&header) + sizeof(header) == buffer.Begin(), "Packet is non contigious!");
 	//Don't count the CRC32 when calculating the checksum
-	const uint8_t* begin = reinterpret_cast<const uint8_t*>(&header) + sizeof(header.CRC);
+	const uint8_t* begin = reinterpret_cast<const uint8_t*>(&header) + sizeof(header.CRC32);
 
 	uint32_t size = SizeOfPacketData(header, buffer);
 	const uint8_t* end = buffer.Begin() + size;
