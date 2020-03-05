@@ -84,12 +84,6 @@ extern "C"
 
 }
 
-uint32_t CRC32Impl(const uint8_t* data, std::size_t bytes)
-{
-	uint32_t result = HAL_CRC_Calculate(s_CRC32, (uint32_t*) data, bytes);
-	return ~result;
-}
-
 void SerialPrint(Formatter& formatter, LogLevelType level)
 {
 	SerialPrint(std::move(formatter), level);

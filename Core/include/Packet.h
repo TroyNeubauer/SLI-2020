@@ -73,7 +73,7 @@ struct PacketHeader
 const int MAX_PACKET_DATA_SIZE = 256;
 
 
-uint32_t CRC32Impl(const uint8_t* data, size_t bytes);
+uint32_t CRC32Impl(const uint8_t* data, std::size_t bytes);
 
 
 //All the data needed is inside the packet header
