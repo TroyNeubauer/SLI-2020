@@ -85,8 +85,8 @@ void Lights(int count);
 char IsUARTWriteReady(USART_TypeDef* usart);
 
 
-void UARTWrite(USART_TypeDef* usart, DMA_TypeDef* dma, uint8_t dmaChannel, const char* data, uint32_t length);
-void UARTRead(USART_TypeDef* usart, DMA_TypeDef* dma, uint8_t dmaChannel, char* data, uint32_t length);
+void UARTWrite(USART_TypeDef* usart, DMA_TypeDef* dma, uint8_t dmaChannel, const void* data, uint32_t length);
+void UARTRead(USART_TypeDef* usart, DMA_TypeDef* dma, uint8_t dmaChannel, void* data, uint32_t length);
 
 void DMA1_Channel5_IRQHandler_USER();
 void USART1_IRQHandler_USER();

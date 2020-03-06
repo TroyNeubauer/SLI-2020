@@ -38,6 +38,14 @@ extern "C"
 		s_GPSUart = GPSUart;
 		s_CRC32 = crc32;
 
+		SerialPrint("Before delay", LL_INFO);
+		HAL_Delay(500);
+		SerialPrint("1", LL_INFO);
+		HAL_Delay(500);
+		SerialPrint("2", LL_WARN);
+		HAL_Delay(500);
+		SerialPrint("3", LL_TRACE);
+
 		int last = HAL_GetTick();
 
 		SerialPrint(cLog, LL_INFO);
@@ -50,18 +58,18 @@ extern "C"
 
 		board.AddModule(&gps);
 		board.Info("Starting loop");
+		LL_GPIO_TogglePin(GPIOB, LL_GPIO_PIN_13);
+
 		while(true)
 		{
-			board.Info("Looping...");
-			Lights(1);
 			board.Update();
+			board.Info("Looping");
 
 			if (HAL_GetTick() - last > 1250)
 			{
-				LL_GPIO_TogglePin(GPIOB, LL_GPIO_AF_EVENTOUT_PIN_12);
+				LL_GPIO_TogglePin(GPIOB, LL_GPIO_PIN_12);
 				last = HAL_GetTick();
 			}
-
 		}
 	}
 
@@ -100,26 +108,26 @@ void SerialPrint(Formatter&& formatter, LogLevelType level)
 	StackBuffer<sizeof(PacketHeader) + sizeof(MessagePacket) + 256> buf;
 
 	PacketHeader* header = buf.Header();
+	header->ID = 0;
+	header->UnixSeconds = 420;
+	header->NanoSeconds = 69;
+
 	header->Destination = ModuleID::GROUND_STATION;
 	header->Forwarder = ModuleID::NONE;
 	header->From = ModuleID::STM32F103;
-	header->NanoSeconds = 69;
-	header->UnixSeconds = 420;
 	header->Type = PacketType::MESSAGE;
-	header->ID = 0;
 
 	MessagePacket* messagePacket = buf.Ptr<MessagePacket>();
 	messagePacket->Level = level;
 	messagePacket->MessageLength = formatter.Size();
 
-	char* destMessage = buf.As<char>(formatter.Size());
-	memcpy(destMessage, formatter.Data(), formatter.Size());
+	char* destMessage = buf.As<char>(messagePacket->MessageLength);
+	memcpy(destMessage, formatter.Data(), messagePacket->MessageLength);
 
 	header->CRC32 = buf.CalculateCRC32();
 
 
-	uint32_t length = buf.Offset() + formatter.Size();
-	UARTWrite(RADIO_UART, DMA1, RADIO_DMA_CHANNEL_TX, reinterpret_cast<const char*>(buf.Begin()), length);
+	UARTWrite(RADIO_UART, DMA1, RADIO_DMA_CHANNEL_TX, buf.Begin(), buf.Offset());
 
 
 }

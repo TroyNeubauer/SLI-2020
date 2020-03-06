@@ -235,6 +235,7 @@ void DMA1_Channel6_IRQHandler(void)
   /* USER CODE END DMA1_Channel6_IRQn 0 */
   
   /* USER CODE BEGIN DMA1_Channel6_IRQn 1 */
+	LL_GPIO_TogglePin(GPIOB, LL_GPIO_PIN_13);
 
   /* USER CODE END DMA1_Channel6_IRQn 1 */
 }

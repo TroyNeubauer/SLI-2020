@@ -11,7 +11,7 @@ uint8_t gpsBuf[128];
 
 void GPS::Init()
 {
-/*	Trace("GPS::Init");
+	Trace("GPS::Init");
 	NMEASend("PMTK251,115200");
 	Trace("Sent GPS baud rate change command");
 
@@ -34,31 +34,13 @@ void GPS::Init()
 	Info("Changed GPS baud rate to 115200 b/s");
 
 	HAL_Delay(1);
-	//NMEASend("PMTK220,100");
-	//Info("Set GPS to 10Hz");
+	NMEASend("PMTK220,100");
+	Info("Set GPS to 10Hz");
 
 	NMEASend("PMTK314,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0");
 
-	/*	LL_DMA_DisableChannel(DMA1, LL_DMA_CHANNEL_5);
+	UARTRead(GPS_UART, DMA1, GPS_DMA_CHANNEL_RX, gpsBuf, sizeof(gpsBuf));
 
-	 LL_DMA_ConfigAddresses(DMA1, LL_DMA_CHANNEL_5, LL_USART_DMA_GetRegAddr(m_GPSUART), (uint32_t) gpsBuf,
-	 LL_DMA_GetDataTransferDirection(DMA1, LL_DMA_CHANNEL_5));
-	 // Configure data length
-	 LL_DMA_SetDataLength(DMA1, LL_DMA_CHANNEL_5, sizeof(gpsBuf));
-	 // Enable DMA Transfer complete interrupt
-	 LL_DMA_EnableIT_TC(DMA1, LL_DMA_CHANNEL_5);
-	 LL_USART_EnableIT_IDLE(m_GPSUART);
-
-	 //	LL_SPI_SetRxFIFOThreshold(SPI3,LL_SPI_RX_FIFO_TH_QUARTER);
-	 //	LL_SPI_EnableDMAReq_RX(SPI3);
-	 LL_USART_EnableDMAReq_RX(m_GPSUART);
-
-	 // Enable UART
-	 LL_USART_Enable(m_GPSUART);
-	 // Enable DMA_1,CHANNEL_5
-	 LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_5);
-
-	 Info("Enabling IDLE interupts");*/
 }
 
 uint32_t startTicks;
@@ -98,11 +80,11 @@ void GPS::DMA1_C5_IRQHandler()
 void GPS::UART_IRQHandler()
 {
 	Info("GPS::UART_IRQHandler");
-//	if (LL_USART_IsEnabledIT_IDLE(USART1) && LL_USART_IsActiveFlag_IDLE(USART1))
-//	{
-//		LL_USART_ClearFlag_IDLE(USART1); /* Clear IDLE line flag */
-//		CheckRX(); /* Check for data to process */
-//	}
+	if (LL_USART_IsEnabledIT_IDLE(USART1) && LL_USART_IsActiveFlag_IDLE(USART1))
+	{
+		LL_USART_ClearFlag_IDLE(USART1); /* Clear IDLE line flag */
+		CheckRX(); /* Check for data to process */
+	}
 }
 
 void GPS::NMEASend(const char *command)

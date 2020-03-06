@@ -1,6 +1,7 @@
 #pragma once
 
-#include <stdint.h>
+#include <cstdint>
+#include <cstddef>
 
 using PacketTypeValue = uint8_t;
 
@@ -73,17 +74,17 @@ static_assert( &(((PacketHeader*) nullptr)->CRC32) == 0, "CRC must start at offs
 const int MAX_PACKET_DATA_SIZE = 256;
 
 
-uint32_t CRC32Impl(const uint8_t* data, size_t bytes);
+uint32_t CRC32Impl(const uint8_t* data, std::size_t bytes);
 
 
-//All the data needed is inside the packet header
+//All the data needed is inside the packet header so there is no point in having an empty struct
+/*
 struct InitPacket
 {
-	uint32_t Reserved = 0xDEADBEEF;
 };
+*/
 
 static_assert(sizeof(InitPacket) == 4, "InitPacket is wrong size");
-
 
 struct StatusPacket
 {

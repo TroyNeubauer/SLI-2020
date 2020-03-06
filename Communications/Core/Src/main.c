@@ -25,6 +25,7 @@
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
 #include <string.h>
+#include <stdint.h>
 
 #include "InvokeCpp.h"
 
@@ -410,6 +411,7 @@ static void MX_USART1_UART_Init(void)
   LL_USART_ConfigAsyncMode(USART1);
   LL_USART_Enable(USART1);
   /* USER CODE BEGIN USART1_Init 2 */
+  LL_USART_EnableIT_IDLE(USART1);
 
   /* USER CODE END USART1_Init 2 */
 
@@ -499,6 +501,7 @@ static void MX_USART2_UART_Init(void)
   LL_USART_ConfigAsyncMode(USART2);
   LL_USART_Enable(USART2);
   /* USER CODE BEGIN USART2_Init 2 */
+  LL_USART_EnableIT_IDLE(USART2);
 
   /* USER CODE END USART2_Init 2 */
 
@@ -593,15 +596,13 @@ char IsUARTWriteReady(USART_TypeDef* usart)
 }
 
 
-void UARTWrite(USART_TypeDef* usart, DMA_TypeDef* dma, uint8_t dmaChannel, const char* data, uint32_t length)
-{
-	while(!IsUARTWriteReady(usart))
-	{
 
-	}
+void UARTWrite(USART_TypeDef* usart, DMA_TypeDef* dma, uint8_t dmaChannel, const void* data, uint32_t length)
+{
 
 	//LL_GPIO_TogglePin(GPIOB, LL_GPIO_PIN_12);
 	LL_DMA_DisableChannel(dma, dmaChannel);
+//	LL_DMA_EnableIT_TC(dma, dmaChannel);
 
 	// set length to be tranmitted
 	LL_DMA_SetDataLength(dma, dmaChannel, length );
@@ -611,40 +612,34 @@ void UARTWrite(USART_TypeDef* usart, DMA_TypeDef* dma, uint8_t dmaChannel, const
 	// configure address to be transmitted by DMA
 	LL_DMA_ConfigAddresses(dma, dmaChannel, (uint32_t) data,
 			(uint32_t) LL_USART_DMA_GetRegAddr(usart), LL_DMA_GetDataTransferDirection(dma, dmaChannel));
-	LL_USART_Enable(usart);
+
+	// Enable DMA again
+	LL_DMA_EnableChannel(dma, dmaChannel);
+	HAL_Delay(1.0f / 115200.0f * length * 8 * 1000);
+}
+
+void UARTRead(USART_TypeDef* usart, DMA_TypeDef* dma, uint8_t dmaChannel, void* data, uint32_t length)
+{
+
+	//LL_GPIO_TogglePin(GPIOB, LL_GPIO_PIN_12);
+	LL_DMA_DisableChannel(dma, dmaChannel);
+
+	// set length to be tranmitted
+	LL_DMA_SetDataLength(dma, dmaChannel, length);
+
+	LL_USART_EnableDMAReq_RX(usart);
+
+	// configure address to be transmitted by DMA
+	LL_DMA_ConfigAddresses(dma, dmaChannel, (uint32_t) data,
+			(uint32_t) LL_USART_DMA_GetRegAddr(usart), LL_DMA_GetDataTransferDirection(dma, dmaChannel));
+
+	LL_DMA_EnableIT_HT(dma, dmaChannel);
+	LL_DMA_EnableIT_TC(dma, dmaChannel);
+
+
 	// Enable DMA again
 	LL_DMA_EnableChannel(dma, dmaChannel);
 
-/*	for (int i = 0; i < length; i++)
-	{
-		while (!LL_USART_IsActiveFlag_TXE(usart))
-		{
-
-		}
-		LL_USART_TransmitData8(usart, data[i]);
-
-	}*/
-
-
-}
-
-void UARTRead(USART_TypeDef* usart, DMA_TypeDef* dma, uint8_t dmaChannel, char* data, uint32_t length)
-{
-/*	LL_GPIO_TogglePin(GPIOB, LL_GPIO_PIN_12);
-	for (uint32_t i = 0; i < length; i++)
-	{
-		while (!LL_USART_IsActiveFlag_RXNE(usart))
-		{
-		}
-		data[i] = LL_USART_ReceiveData8(usart);
-
-	}
-	while (!LL_USART_IsActiveFlag_TC(usart))
-	{
-	}
-
-	LL_GPIO_TogglePin(GPIOB, LL_GPIO_PIN_13);
-*/
 }
 
 
