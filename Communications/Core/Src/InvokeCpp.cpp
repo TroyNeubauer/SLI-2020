@@ -1,7 +1,4 @@
-
-
 #include "stm32f1xx.h"
-#include "stm32f1xx_hal_crc.h"
 
 #include <cstdlib>
 #include <cstdio>
@@ -14,12 +11,10 @@
 #include "Core.h"
 #include "Packet.h"
 
-
 CommunicationsBoard* boardPtr = nullptr;
 
 USART_TypeDef* s_RadioUart = nullptr;
 USART_TypeDef* s_GPSUart = nullptr;
-CRC_HandleTypeDef* s_CRC32 = nullptr;
 
 GPS* gpsPtr = nullptr;
 
@@ -32,23 +27,16 @@ extern "C"
 {
 	SizedFormatter<256> cLog;
 
-	void InvokeCpp(USART_TypeDef* radioUart, USART_TypeDef* GPSUart, CRC_HandleTypeDef* crc32)
+	void InvokeCpp(USART_TypeDef* radioUart, USART_TypeDef* GPSUart)
 	{
 		s_RadioUart = radioUart;
 		s_GPSUart = GPSUart;
-		s_CRC32 = crc32;
-
-		SerialPrint("Before delay", LL_INFO);
-		HAL_Delay(500);
-		SerialPrint("1", LL_INFO);
-		HAL_Delay(500);
-		SerialPrint("2", LL_WARN);
-		HAL_Delay(500);
-		SerialPrint("3", LL_TRACE);
-
-		int last = HAL_GetTick();
+		Lights(1);
 
 		SerialPrint(cLog, LL_INFO);
+		HAL_Delay(100);
+
+		Lights(2);
 
 		CommunicationsBoard board(radioUart, GPSUart);
 		boardPtr = &board;
@@ -60,19 +48,24 @@ extern "C"
 		board.Info("Starting loop");
 		LL_GPIO_TogglePin(GPIOB, LL_GPIO_PIN_13);
 
-		while(true)
+		int last = HAL_GetTick();
+		while (true)
 		{
 			board.Update();
-			board.Info("Looping");
+			board.Info("Looping1");
+			board.Info("Looping2");
+			board.Info("Looping3");
 
 			if (HAL_GetTick() - last > 1250)
 			{
 				LL_GPIO_TogglePin(GPIOB, LL_GPIO_PIN_12);
 				last = HAL_GetTick();
 			}
+			HAL_Delay(200);
+			board.Info("Delayed");
+			HAL_Delay(5);
 		}
 	}
-
 
 	void CLog(const char* message)
 	{
@@ -80,14 +73,73 @@ extern "C"
 		cLog << message << '\n';
 	}
 
-	void DMA1_Channel5_IRQHandler_USER()
+	std::array<std::array<bool, 8>, 3> s_ActiveDMA = { };
+
+	int GetDMAIndex(DMA_TypeDef* dma)
 	{
-		gpsPtr->DMA1_C5_IRQHandler();
+		if (dma == DMA1)
+			return 1;
+//	else if (dma == DMA2)
+//		return 2;
+		else
+		{
+			SLI_ASSERT(false, "Unknown DMA!");
+			return 0;
+		}
 	}
 
-	void USART1_IRQHandler_USER()
+	void UART_DMA_Interupt(DMA_TypeDef* dma, uint8_t dmaChannel)
 	{
-		gpsPtr->UART_IRQHandler();
+		//s_ActiveDMA[GetDMAIndex(dma)][dmaChannel] = false;
+		LL_GPIO_TogglePin(GPIOB, LL_GPIO_PIN_12);
+	}
+
+	void UARTWrite(USART_TypeDef* usart, DMA_TypeDef* dma, uint8_t dmaChannel, const void* data, uint32_t length)
+	{
+		while (s_ActiveDMA[GetDMAIndex(dma)][dmaChannel])
+		{
+		}
+
+		s_ActiveDMA[GetDMAIndex(dma)][dmaChannel] = true;
+
+		LL_DMA_DisableChannel(dma, dmaChannel);
+
+		// set length to be tranmitted
+		LL_DMA_SetDataLength(dma, dmaChannel, length);
+
+		LL_USART_EnableDMAReq_TX(usart);
+
+		// configure address to be transmitted by DMA
+		LL_DMA_ConfigAddresses(dma, dmaChannel, (uint32_t) data, (uint32_t) LL_USART_DMA_GetRegAddr(usart),
+				LL_DMA_GetDataTransferDirection(dma, dmaChannel));
+
+		// Enable DMA again
+		LL_DMA_EnableChannel(dma, dmaChannel);
+		LL_DMA_EnableIT_TC(dma, dmaChannel);
+
+	}
+
+	void UARTRead(USART_TypeDef* usart, DMA_TypeDef* dma, uint8_t dmaChannel, void* data, uint32_t length)
+	{
+		while (s_ActiveDMA[GetDMAIndex(dma)][dmaChannel])
+		{
+		}
+
+		s_ActiveDMA[GetDMAIndex(dma)][dmaChannel] = true;
+
+		LL_DMA_DisableChannel(dma, dmaChannel);
+
+		LL_DMA_SetDataLength(dma, dmaChannel, length);
+
+		LL_USART_EnableDMAReq_RX(usart);
+
+		LL_DMA_ConfigAddresses(dma, dmaChannel, (uint32_t) data, (uint32_t) LL_USART_DMA_GetRegAddr(usart),
+				LL_DMA_GetDataTransferDirection(dma, dmaChannel));
+
+		LL_DMA_EnableIT_TC(dma, dmaChannel);
+
+		LL_DMA_EnableChannel(dma, dmaChannel);
+
 	}
 
 }
@@ -97,7 +149,6 @@ void SerialPrint(Formatter& formatter, LogLevelType level)
 	SerialPrint(std::move(formatter), level);
 }
 
-
 void SerialPrint(Formatter&& formatter, LogLevelType level)
 {
 	if (s_RadioUart == nullptr)
@@ -105,7 +156,7 @@ void SerialPrint(Formatter&& formatter, LogLevelType level)
 		My_Error_Handler();
 	}
 
-	StackBuffer<sizeof(PacketHeader) + sizeof(MessagePacket) + 256> buf;
+	StackBuffer < sizeof(PacketHeader) + sizeof(MessagePacket) + 256 > buf;
 
 	PacketHeader* header = buf.Header();
 	header->ID = 0;
@@ -126,9 +177,7 @@ void SerialPrint(Formatter&& formatter, LogLevelType level)
 
 	header->CRC32 = buf.CalculateCRC32();
 
-
 	UARTWrite(RADIO_UART, DMA1, RADIO_DMA_CHANNEL_TX, buf.Begin(), buf.Offset());
-
 
 }
 
@@ -136,7 +185,7 @@ void SLIAssertFailed(const char* message)
 {
 	SizedFormatter<256> formatter;
 	formatter << "ASSERTION FAILED!!\n" << message;
-	SerialPrint(formatter, LL_ERROR);
+	UARTWriteSync(s_RadioUart, formatter.c_str(), formatter.Size());
 	My_Error_Handler();
 }
 

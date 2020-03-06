@@ -15,6 +15,7 @@ void GPS::Init()
 	NMEASend("PMTK251,115200");
 	Trace("Sent GPS baud rate change command");
 
+	DelayUS(100);
 	LL_USART_DeInit(m_GPSUART);
 
 	LL_USART_InitTypeDef USART_InitStruct =
@@ -33,7 +34,6 @@ void GPS::Init()
 
 	Info("Changed GPS baud rate to 115200 b/s");
 
-	HAL_Delay(1);
 	NMEASend("PMTK220,100");
 	Info("Set GPS to 10Hz");
 
@@ -57,12 +57,10 @@ void GPS::RecievePacket(PacketBuffer &packet)
 
 void GPS::CheckRX()
 {
-	Info("Checking RX");
 }
 
 void GPS::DMA1_C5_IRQHandler()
 {
-	Info("GPS::DMA1_C5_IRQHandler");
 	if (LL_DMA_IsEnabledIT_HT(DMA1, LL_DMA_CHANNEL_5) && LL_DMA_IsActiveFlag_HT5(DMA1))
 	{
 		LL_DMA_ClearFlag_HT5(DMA1); /* Clear half-transfer complete flag */
@@ -79,7 +77,6 @@ void GPS::DMA1_C5_IRQHandler()
 
 void GPS::UART_IRQHandler()
 {
-	Info("GPS::UART_IRQHandler");
 	if (LL_USART_IsEnabledIT_IDLE(USART1) && LL_USART_IsActiveFlag_IDLE(USART1))
 	{
 		LL_USART_ClearFlag_IDLE(USART1); /* Clear IDLE line flag */
@@ -109,7 +106,7 @@ void GPS::NMEASend(const char *command)
 	SLI_ASSERT(chars < (int ) sizeof(buf), "NMEASend buffer overflow");
 	Info("Sending command to GPS:");
 	Info(buf);
-	UARTWrite(m_GPSUART, DMA1, GPS_DMA_CHANNEL_TX, buf, chars);
+	UARTWriteSync(m_GPSUART, buf, chars);
 
 }
 

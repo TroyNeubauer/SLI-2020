@@ -76,6 +76,9 @@ extern "C" {
 void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
+
+void UART_DMA_Interupt(DMA_TypeDef* dma, uint8_t dmaChannel);
+
 void CLog(const char* message);
 void My_Error_Handler(void);
 void DelayUS(uint16_t us);
@@ -88,8 +91,10 @@ char IsUARTWriteReady(USART_TypeDef* usart);
 void UARTWrite(USART_TypeDef* usart, DMA_TypeDef* dma, uint8_t dmaChannel, const void* data, uint32_t length);
 void UARTRead(USART_TypeDef* usart, DMA_TypeDef* dma, uint8_t dmaChannel, void* data, uint32_t length);
 
-void DMA1_Channel5_IRQHandler_USER();
-void USART1_IRQHandler_USER();
+void UARTWriteSync(USART_TypeDef* usart, const void* data, uint32_t length);
+void UARTReadSync(USART_TypeDef* usart, void* data, uint32_t length);
+
+
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/

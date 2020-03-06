@@ -82,9 +82,10 @@ uint32_t CRC32Impl(const uint8_t* data, std::size_t bytes);
 struct InitPacket
 {
 };
-*/
 
 static_assert(sizeof(InitPacket) == 4, "InitPacket is wrong size");
+*/
+
 
 struct StatusPacket
 {
