@@ -1,6 +1,6 @@
 #pragma once
 
-#include <cstdint>
+#include <stdint.h>
 
 using PacketTypeValue = uint8_t;
 
@@ -48,7 +48,7 @@ namespace StatusValue {
 
 }
 
-enum class ModuleID;
+using ModuleIDType = uint8_t;
 
 struct PacketHeader
 {
@@ -59,10 +59,10 @@ struct PacketHeader
 	uint32_t NanoSeconds;
 
 	//Where the packet originally came from
-	ModuleID Destination;
-	ModuleID Forwarder;
+	ModuleIDType Destination;
+	ModuleIDType Forwarder;
 
-	ModuleID From;
+	ModuleIDType From;
 	PacketTypeValue Type;
 
 };
@@ -73,7 +73,7 @@ struct PacketHeader
 const int MAX_PACKET_DATA_SIZE = 256;
 
 
-uint32_t CRC32Impl(const uint8_t* data, std::size_t bytes);
+uint32_t CRC32Impl(const uint8_t* data, size_t bytes);
 
 
 //All the data needed is inside the packet header
@@ -82,21 +82,29 @@ struct InitPacket
 	uint32_t Reserved = 0xDEADBEEF;
 };
 
+static_assert(sizeof(InitPacket) == 4);
+
+
 struct StatusPacket
 {
 	StatusTypeValue Status;
 };
+
+static_assert(sizeof(StatusPacket) == 1);
 
 
 const uint32_t MAX_NMEA_LENGTH = 90;//TODO. Double check this
 
 struct DataPacket_GPS
 {
-	uint16_t NMEASentenceLength;//How many bytes the string written after this struct is
+	uint8_t NMEASentenceLength;//How many bytes the string written after this struct is
 	/*
 	const char* NMEASentence;//Encoded after this struct
 	*/
 };
+
+static_assert(sizeof(DataPacket_GPS) == 1);
+
 
 struct DataPacket_STMF103
 {
@@ -120,9 +128,14 @@ constexpr LogLevelType LL_ERROR = 3;
 
 struct MessagePacket
 {
-	LogLevelType Level;
 	uint16_t MessageLength;//How many bytes the string written after this struct is
+	LogLevelType Level;
+	uint8_t Reserved;
 	/*
 	const char* Message;//Encoded after this struct
 	*/
 };
+
+static_assert(sizeof(MessagePacket) == 4);
+
+

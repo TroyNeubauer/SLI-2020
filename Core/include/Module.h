@@ -13,14 +13,16 @@
 
 class PacketBuffer;
 
-enum class ModuleID
-{
-	NONE = 0, GROUND_STATION = 1, STM32F205 = 2, STM32F103 = 3,
-	ALT1 = 10, ALT2 = 11, GPS = 12, RADIO = 13, ACCEL = 14, SD_CARD = 15,
-	MAX_MODULE_ID = 16,
-};
+using ModuleIDType = uint8_t;
 
-const char* GetModuleIDName(ModuleID id);
+namespace ModuleID
+{
+	const ModuleIDType NONE = 0, GROUND_STATION = 1, STM32F205 = 2, STM32F103 = 3,
+		ALT1 = 10, ALT2 = 11, GPS = 12, RADIO = 13, ACCEL = 14, SD_CARD = 15,
+		MAX_MODULE_ID = 16;
+}
+
+const char* GetModuleIDName(ModuleIDType id);
 
 //Implemented by each parent-module
 extern void SerialPrint(Formatter& formatter, LogLevelType level);
@@ -31,7 +33,7 @@ extern const char* GetParentModuleName();
 class SLILogable
 {
 public:
-	virtual ModuleID GetID() const = 0;
+	virtual ModuleIDType GetID() const = 0;
 
 	virtual ~SLILogable() {}
 
@@ -57,12 +59,12 @@ struct PacketHeader;
 class SLIModule : public SLILogable
 {
 public:
-	SLIModule(SLICoreModule* core, ModuleID moduleID) : m_CoreModule(core), m_ModuleID(moduleID) {}
+	SLIModule(SLICoreModule* core, ModuleIDType moduleID) : m_CoreModule(core), m_ModuleID(moduleID) {}
 
 	virtual void Init() = 0;
 	virtual void Update() = 0;
 	virtual void RecievePacket(PacketBuffer& packet) = 0;
-	virtual inline ModuleID GetID() const { return m_ModuleID; }
+	virtual inline ModuleIDType GetID() const { return m_ModuleID; }
 
 	inline int32_t GetIntID() const { return static_cast<int32_t>(m_ModuleID); }
 	void SendPacket(PacketBuffer& packet);
@@ -74,7 +76,7 @@ public:
 private:
 
 	SLICoreModule* m_CoreModule;
-	ModuleID m_ModuleID;
+	ModuleIDType m_ModuleID;
 };
 
 
@@ -84,7 +86,7 @@ private:
 class SLICoreModule : public SLILogable
 {
 public:
-	SLICoreModule(ModuleID self);
+	SLICoreModule(ModuleIDType self);
 
 	virtual void Update() = 0;
 
@@ -97,11 +99,11 @@ public:
 	virtual void RecievePacket(PacketBuffer& packet);
 
 	//Returns true if this module is directly connected to this device
-	bool HasModule(ModuleID id);
+	bool HasModule(ModuleIDType id);
 	void AddModule(SLIModule* module);
-	SLIModule* GetModule(ModuleID id);
+	SLIModule* GetModule(ModuleIDType id);
 
-	virtual ModuleID GetID() const { return m_ModuleID; }
+	virtual ModuleIDType GetID() const { return m_ModuleID; }
 
 
 	virtual ~SLICoreModule() {}
@@ -120,10 +122,10 @@ private:
 protected:
 	//Either a pointer to the module if is packets can be sent directly to it
 	//Or nullptr if a packet being sent there needs routing
-	std::array<SLIModule*, static_cast<int>(ModuleID::MAX_MODULE_ID)> m_ContainedModules;
+	std::array<SLIModule*, ModuleID::MAX_MODULE_ID> m_ContainedModules;
 
 private:
-	ModuleID m_ModuleID;
+	ModuleIDType m_ModuleID;
 };
 
 extern SLICoreModule* GetDefaultCoreModule();

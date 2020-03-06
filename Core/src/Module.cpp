@@ -8,7 +8,7 @@
 
 #include "Buffer.h"
 
-SLICoreModule::SLICoreModule(ModuleID self) : m_ModuleID(self)
+SLICoreModule::SLICoreModule(ModuleIDType self) : m_ModuleID(self)
 {
 	std::fill(m_ContainedModules.begin(), m_ContainedModules.end(), nullptr);
 }
@@ -59,7 +59,7 @@ void SLICoreModule::DeliverLocalPacket(PacketBuffer& packet)
 
 
 
-bool SLICoreModule::HasModule(ModuleID id)
+bool SLICoreModule::HasModule(ModuleIDType id)
 {
 	int intID = static_cast<int>(id);
 	if (intID >= static_cast<int>(ModuleID::MAX_MODULE_ID) || intID < 0)
@@ -94,7 +94,7 @@ void SLICoreModule::AddModule(SLIModule* module)
 
 }
 
-SLIModule* SLICoreModule::GetModule(ModuleID id)
+SLIModule* SLICoreModule::GetModule(ModuleIDType id)
 {
 	int intId = static_cast<int>(id);
 	SLI_FASSERT(m_ContainedModules[intId], f << "Module " << GetModuleIDName(id) << "Doesnt exist on board!");
@@ -156,7 +156,7 @@ void SLILogable::Error(Formatter&& formatter)
 }
 
 
-const char* GetModuleIDName(ModuleID id)
+const char* GetModuleIDName(ModuleIDType id)
 {
 	switch(id)
 	{
