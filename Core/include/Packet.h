@@ -67,7 +67,7 @@ struct PacketHeader
 
 };
 
-//static_assert(offset_of(PacketHeader, CRC32) == 0, "CRC must start at offset 0");
+static_assert(offsetof(PacketHeader, CRC32) == 0, "CRC must start at offset 0");
 
 
 const int MAX_PACKET_DATA_SIZE = 256;
@@ -82,7 +82,7 @@ struct InitPacket
 	uint32_t Reserved = 0xDEADBEEF;
 };
 
-static_assert(sizeof(InitPacket) == 4);
+static_assert(sizeof(InitPacket) == 4, "InitPacket is wrong size");
 
 
 struct StatusPacket
@@ -90,7 +90,7 @@ struct StatusPacket
 	StatusTypeValue Status;
 };
 
-static_assert(sizeof(StatusPacket) == 1);
+static_assert(sizeof(StatusPacket) == 1, "StatusPacket is wrong size");
 
 
 const uint32_t MAX_NMEA_LENGTH = 90;//TODO. Double check this
@@ -103,7 +103,7 @@ struct DataPacket_GPS
 	*/
 };
 
-static_assert(sizeof(DataPacket_GPS) == 1);
+static_assert(sizeof(DataPacket_GPS) == 1, "DataPacket_GPS is wrong size");
 
 
 struct DataPacket_STMF103
@@ -136,6 +136,6 @@ struct MessagePacket
 	*/
 };
 
-static_assert(sizeof(MessagePacket) == 4);
+static_assert(sizeof(MessagePacket) == 4, "MessagePacket is wrong size");
 
 
