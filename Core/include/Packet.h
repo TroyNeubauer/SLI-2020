@@ -51,6 +51,8 @@ namespace StatusValue {
 
 using ModuleIDType = uint8_t;
 
+const uint8_t MAGIC_VALUE = 0xDD;
+
 struct PacketHeader
 {
 	uint32_t CRC32;

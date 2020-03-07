@@ -47,12 +47,12 @@ void InvokeCpp(UART_HandleTypeDef* radioUart, UART_HandleTypeDef* gpsUart)
 	while (true)
 	{
 		board.Update();
-		board.Info("Test");
 
 		if (HAL_GetTick() - last > 1250)
 		{
 			HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_12);
 			last = HAL_GetTick();
+			board.Info("Test message!");
 		}
 	}
 }
