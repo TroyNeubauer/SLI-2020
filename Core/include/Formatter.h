@@ -97,6 +97,9 @@ public:
 		return Write(value);
 	}
 
+	Formatter& SubString(const char* string, std::size_t length, std::size_t offset = 0);
+
+
 
 private:
 	const static char UPPER_DIGITS[16];
@@ -170,6 +173,7 @@ public:
 	template<typename T> inline Formatter& Base(const T& value, uint8_t base) { return m_Wrapper.Base(value, base); }
 	template<typename T> inline Formatter& Write(const T& value) { return m_Wrapper.Write(value); }
 	template<typename T> inline Formatter& W(const T& value) { return m_Wrapper.W(value); }
+	inline Formatter& SubString(const char* string, std::size_t length, std::size_t offset = 0) { return m_Wrapper.SubString(string, length, offset); }
 
 private:
 	char m_Buf[Cap];

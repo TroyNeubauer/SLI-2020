@@ -15,7 +15,7 @@ CommunicationsBoard& CommunicationsBoard::GetInstance()
 	return *s_Instance;
 }
 
-CommunicationsBoard::CommunicationsBoard(USART_TypeDef* radioUART, USART_TypeDef* GPSUART)
+CommunicationsBoard::CommunicationsBoard(UART_HandleTypeDef* radioUART, UART_HandleTypeDef* GPSUART)
 	: SLICoreModule(ModuleID::STM32F103), m_RadioUART(radioUART), m_GPSUART(GPSUART)
 {
 	s_Instance = this;
@@ -38,7 +38,7 @@ void CommunicationsBoard::RoutePacket(PacketBuffer& packet)
 	PacketHeader* header = packet.Header();
 	if (header->Destination == ModuleID::GROUND_STATION)
 	{
-		UARTWrite(m_RadioUART, DMA1, RADIO_DMA_CHANNEL_TX, (char*) packet.Begin(), packet.Offset());
+		UARTWrite(m_RadioUART, packet.Begin(), packet.Offset());
 
 	}
 	else if (header->Destination == ModuleID::STM32F205)

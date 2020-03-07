@@ -3,12 +3,15 @@
 #include "Module.h"
 #include "Buffer.h"
 
-#include "stm32f1xx_ll_usart.h"
+#include "stm32f1xx_hal.h"
+#include "stm32f1xx_hal_uart.h"
+#include "stm32f1xx_hal_dma.h"
+#include "stm32f1xx_hal_dma_ex.h"
 
 class CommunicationsBoard : public SLICoreModule
 {
 public:
-	CommunicationsBoard(USART_TypeDef* radioUART, USART_TypeDef* GPSUART);
+	CommunicationsBoard(UART_HandleTypeDef* radioUART, UART_HandleTypeDef* GPSUART);
 
 	virtual void Init();
 	virtual void Update();
@@ -21,7 +24,7 @@ private:
 	virtual void RoutePacket(PacketBuffer& packet);
 
 private:
-	USART_TypeDef* m_RadioUART;
-	USART_TypeDef* m_GPSUART;
+	UART_HandleTypeDef* m_RadioUART;
+	UART_HandleTypeDef* m_GPSUART;
 };
 

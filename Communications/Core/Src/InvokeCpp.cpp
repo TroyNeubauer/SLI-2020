@@ -13,8 +13,8 @@
 
 CommunicationsBoard* boardPtr = nullptr;
 
-USART_TypeDef* s_RadioUart = nullptr;
-USART_TypeDef* s_GPSUart = nullptr;
+UART_HandleTypeDef* s_RadioUart = nullptr;
+UART_HandleTypeDef* s_gpsUart = nullptr;
 
 GPS* gpsPtr = nullptr;
 
@@ -25,122 +25,75 @@ const char* GetParentModuleName();
 
 extern "C"
 {
-	SizedFormatter<256> cLog;
+SizedFormatter<256> cLog;
 
-	void InvokeCpp(USART_TypeDef* radioUart, USART_TypeDef* GPSUart)
+void InvokeCpp(UART_HandleTypeDef* radioUart, UART_HandleTypeDef* gpsUart)
+{
+	s_RadioUart = radioUart;
+	s_gpsUart = gpsUart;
+
+	SerialPrint(cLog, LL_INFO);
+
+	CommunicationsBoard board(radioUart, gpsUart);
+	boardPtr = &board;
+	board.Init();
+
+	GPS gps(&board, gpsUart);
+
+	board.AddModule(&gps);
+	board.Info("Starting loop");
+
+	int last = HAL_GetTick();
+	while (true)
 	{
-		s_RadioUart = radioUart;
-		s_GPSUart = GPSUart;
-		Lights(1);
+		board.Update();
 
-		SerialPrint(cLog, LL_INFO);
-		HAL_Delay(100);
-
-		Lights(2);
-
-		CommunicationsBoard board(radioUart, GPSUart);
-		boardPtr = &board;
-		board.Init();
-
-		GPS gps(&board, GPSUart);
-
-		board.AddModule(&gps);
-		board.Info("Starting loop");
-		LL_GPIO_TogglePin(GPIOB, LL_GPIO_PIN_13);
-
-		int last = HAL_GetTick();
-		while (true)
+		if (HAL_GetTick() - last > 1250)
 		{
-			board.Update();
-			board.Info("Looping1");
-			board.Info("Looping2");
-			board.Info("Looping3");
-
-			if (HAL_GetTick() - last > 1250)
-			{
-				LL_GPIO_TogglePin(GPIOB, LL_GPIO_PIN_12);
-				last = HAL_GetTick();
-			}
-			HAL_Delay(200);
-			board.Info("Delayed");
-			HAL_Delay(5);
+			HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_12);
+			last = HAL_GetTick();
 		}
 	}
+}
 
-	void CLog(const char* message)
-	{
-		cLog << '[' << GetParentModuleName() << " (C code)]: ";
-		cLog << message << '\n';
-	}
+void CLog(const char* message)
+{
+	cLog << '[' << GetParentModuleName() << " (C code)]: ";
+	cLog << message << '\n';
+}
 
-	std::array<std::array<bool, 8>, 3> s_ActiveDMA = { };
+void UART_DMA_Interupt(DMA_HandleTypeDef* dma)
+{
+	//s_ActiveDMA[GetDMAIndex(dma)][dmaChannel] = false;
+	//LL_GPIO_TogglePin(GPIOB, LL_GPIO_PIN_12);
+}
 
-	int GetDMAIndex(DMA_TypeDef* dma)
-	{
-		if (dma == DMA1)
-			return 1;
-//	else if (dma == DMA2)
-//		return 2;
-		else
-		{
-			SLI_ASSERT(false, "Unknown DMA!");
-			return 0;
-		}
-	}
+void UARTWrite(UART_HandleTypeDef* channel, const void* data, uint32_t length)
+{
+	HAL_UART_Transmit(s_RadioUart, reinterpret_cast<uint8_t*>(const_cast<void*>(data)), length, HAL_MAX_DELAY);
+}
 
-	void UART_DMA_Interupt(DMA_TypeDef* dma, uint8_t dmaChannel)
-	{
-		//s_ActiveDMA[GetDMAIndex(dma)][dmaChannel] = false;
-		LL_GPIO_TogglePin(GPIOB, LL_GPIO_PIN_12);
-	}
+void UARTRead(UART_HandleTypeDef* uart, void* data, uint32_t length)
+{
+	HAL_UART_Receive_DMA(uart, reinterpret_cast<uint8_t*>(data), length);
+}
 
-	void UARTWrite(USART_TypeDef* usart, DMA_TypeDef* dma, uint8_t dmaChannel, const void* data, uint32_t length)
-	{
-		while (s_ActiveDMA[GetDMAIndex(dma)][dmaChannel])
-		{
-		}
+void HAL_UART_TxCpltCallback(UART_HandleTypeDef* huart)
+{
+	DefaultFormatter formatter;
+	formatter << "HAL_UART_TxCpltCallback: Read " << " bytes";
+	UARTWriteSync(s_RadioUart, formatter.c_str(), formatter.Size());
+}
 
-		s_ActiveDMA[GetDMAIndex(dma)][dmaChannel] = true;
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef* huart)
+{
 
-		LL_DMA_DisableChannel(dma, dmaChannel);
+}
 
-		// set length to be tranmitted
-		LL_DMA_SetDataLength(dma, dmaChannel, length);
+void HAL_UART_RxHalfCpltCallback(UART_HandleTypeDef* huart)
+{
 
-		LL_USART_EnableDMAReq_TX(usart);
-
-		// configure address to be transmitted by DMA
-		LL_DMA_ConfigAddresses(dma, dmaChannel, (uint32_t) data, (uint32_t) LL_USART_DMA_GetRegAddr(usart),
-				LL_DMA_GetDataTransferDirection(dma, dmaChannel));
-
-		// Enable DMA again
-		LL_DMA_EnableChannel(dma, dmaChannel);
-		LL_DMA_EnableIT_TC(dma, dmaChannel);
-
-	}
-
-	void UARTRead(USART_TypeDef* usart, DMA_TypeDef* dma, uint8_t dmaChannel, void* data, uint32_t length)
-	{
-		while (s_ActiveDMA[GetDMAIndex(dma)][dmaChannel])
-		{
-		}
-
-		s_ActiveDMA[GetDMAIndex(dma)][dmaChannel] = true;
-
-		LL_DMA_DisableChannel(dma, dmaChannel);
-
-		LL_DMA_SetDataLength(dma, dmaChannel, length);
-
-		LL_USART_EnableDMAReq_RX(usart);
-
-		LL_DMA_ConfigAddresses(dma, dmaChannel, (uint32_t) data, (uint32_t) LL_USART_DMA_GetRegAddr(usart),
-				LL_DMA_GetDataTransferDirection(dma, dmaChannel));
-
-		LL_DMA_EnableIT_TC(dma, dmaChannel);
-
-		LL_DMA_EnableChannel(dma, dmaChannel);
-
-	}
+}
 
 }
 
@@ -156,7 +109,7 @@ void SerialPrint(Formatter&& formatter, LogLevelType level)
 		My_Error_Handler();
 	}
 
-	StackBuffer < sizeof(PacketHeader) + sizeof(MessagePacket) + 256 > buf;
+	StackBuffer<sizeof(PacketHeader) + sizeof(MessagePacket) + 256> buf;
 
 	PacketHeader* header = buf.Header();
 	header->ID = 0;
@@ -177,7 +130,7 @@ void SerialPrint(Formatter&& formatter, LogLevelType level)
 
 	header->CRC32 = buf.CalculateCRC32();
 
-	UARTWrite(RADIO_UART, DMA1, RADIO_DMA_CHANNEL_TX, buf.Begin(), buf.Offset());
+	UARTWrite(s_RadioUart, buf.Begin(), buf.Offset());
 
 }
 

@@ -29,18 +29,6 @@ extern "C" {
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f1xx_hal.h"
-#include "stm32f1xx_ll_dma.h"
-#include "stm32f1xx_ll_rcc.h"
-#include "stm32f1xx_ll_bus.h"
-#include "stm32f1xx_ll_system.h"
-#include "stm32f1xx_ll_exti.h"
-#include "stm32f1xx_ll_cortex.h"
-#include "stm32f1xx_ll_utils.h"
-#include "stm32f1xx_ll_pwr.h"
-#include "stm32f1xx_ll_spi.h"
-#include "stm32f1xx_ll_usart.h"
-#include "stm32f1xx.h"
-#include "stm32f1xx_ll_gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -55,15 +43,6 @@ extern "C" {
 /* Exported constants --------------------------------------------------------*/
 /* USER CODE BEGIN EC */
 
-#define RADIO_UART USART2
-#define GPS_UART USART1
-
-#define RADIO_DMA_CHANNEL_RX LL_DMA_CHANNEL_6
-#define RADIO_DMA_CHANNEL_TX LL_DMA_CHANNEL_7
-
-#define GPS_DMA_CHANNEL_TX LL_DMA_CHANNEL_4
-#define GPS_DMA_CHANNEL_RX LL_DMA_CHANNEL_5
-
 
 /* USER CODE END EC */
 
@@ -77,7 +56,7 @@ void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
 
-void UART_DMA_Interupt(DMA_TypeDef* dma, uint8_t dmaChannel);
+void UART_DMA_Interupt(DMA_HandleTypeDef* dma);
 
 void CLog(const char* message);
 void My_Error_Handler(void);
@@ -88,11 +67,11 @@ void Lights(int count);
 char IsUARTWriteReady(USART_TypeDef* usart);
 
 
-void UARTWrite(USART_TypeDef* usart, DMA_TypeDef* dma, uint8_t dmaChannel, const void* data, uint32_t length);
-void UARTRead(USART_TypeDef* usart, DMA_TypeDef* dma, uint8_t dmaChannel, void* data, uint32_t length);
+void UARTWrite(UART_HandleTypeDef* uart, const void* data, uint32_t length);
+void UARTRead(UART_HandleTypeDef* uart, void* data, uint32_t length);
 
-void UARTWriteSync(USART_TypeDef* usart, const void* data, uint32_t length);
-void UARTReadSync(USART_TypeDef* usart, void* data, uint32_t length);
+void UARTWriteSync(UART_HandleTypeDef* uart, const void* data, uint32_t length);
+void UARTReadSync(UART_HandleTypeDef* uart, void* data, uint32_t length);
 
 
 /* USER CODE END EFP */

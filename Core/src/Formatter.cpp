@@ -86,7 +86,7 @@ Formatter& Formatter::operator<<(double value) {
 }
 
 Formatter& Formatter::operator<<(const char *value) {
-	size_t bytes = std::min(std::strlen(value), m_Capacity - m_Offset - 1);
+	std::size_t bytes = std::min(std::strlen(value), m_Capacity - m_Offset - 1);
 	std::memcpy(m_Buf + m_Offset, value, bytes);
 	m_Offset += bytes;
 	return *this;
@@ -101,6 +101,15 @@ Formatter& Formatter::operator<<(bool value) {
 	*this << (value ? "true" : "false");
 	return *this;
 }
+
+Formatter& Formatter::SubString(const char* string, std::size_t length, std::size_t offset)
+{
+	std::size_t bytes = std::min(length, m_Capacity - m_Offset);
+	std::memcpy(m_Buf + m_Offset, string + offset, bytes);
+	m_Offset += bytes;
+	return *this;
+}
+
 
 /*
  See Header for info on commenting

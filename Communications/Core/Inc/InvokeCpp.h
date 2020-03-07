@@ -1,2 +1,2 @@
 
-extern void InvokeCpp(USART_TypeDef* radioUart, USART_TypeDef* GPSUart);
+extern void InvokeCpp(UART_HandleTypeDef* radioUart, UART_HandleTypeDef* GPSUart);

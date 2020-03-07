@@ -1,14 +1,12 @@
 #pragma once
 
-#include "Module.h"
-//#include "stm32f1xx_ll_usart.h"
-#include "stm32f1xx_ll_dma.h"
+#include "Modules/CommunicationsBoard.h"
 
 class GPS : public SLIModule
 {
 public:
 
-	GPS(SLICoreModule* core, USART_TypeDef* gps) : SLIModule(core, ModuleID::GPS), m_GPSUART(gps) {}
+	GPS(SLICoreModule* core, UART_HandleTypeDef* gps) : SLIModule(core, ModuleID::GPS), m_gpsUART(gps) {}
 	virtual void Init();
 	virtual void Update();
 	virtual void RecievePacket(PacketBuffer& packet);
@@ -28,7 +26,7 @@ private:
 
 
 private:
-	USART_TypeDef* m_GPSUART;
+	UART_HandleTypeDef* m_gpsUART;
 
 };
 
