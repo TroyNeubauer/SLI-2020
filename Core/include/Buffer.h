@@ -11,7 +11,10 @@ class PacketBuffer
 {
 public:
 	PacketBuffer(uint8_t* buf, uint32_t capacity)
-		: m_Buf(buf), m_Header(reinterpret_cast<PacketHeader*>(m_Buf)), m_Capacity(capacity), m_Offset(sizeof(PacketHeader)) {}
+		: m_Buf(buf), m_Header(reinterpret_cast<PacketHeader*>(sizeof(uint32_t) + m_Buf)), m_Capacity(capacity), m_Offset(sizeof(uint32_t) + sizeof(PacketHeader))
+	{
+		std::fill(m_Buf, m_Buf + sizeof(uint32_t), 0xDD);
+	}
 
 	PacketBuffer(const PacketBuffer& other) : m_Buf(other.m_Buf), m_Header(other.m_Header), m_Capacity(other.m_Capacity), m_Offset(other.m_Offset) {}
 

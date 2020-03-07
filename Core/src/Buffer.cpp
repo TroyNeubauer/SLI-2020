@@ -19,7 +19,8 @@ bool PacketBuffer::Read(void* dest, std::size_t bytes)
 
 uint32_t PacketBuffer::CalculateCRC32()
 {
-	uint8_t* begin = m_Buf + sizeof(m_Header->CRC32);
+	//Dont count the magic or the checksum itself
+	uint8_t* begin = m_Buf + sizeof(uint32_t) + sizeof(m_Header->CRC32);
 	uint8_t* end = m_Buf + m_Offset;
 	return CRC32Impl(begin, end - begin);
 }

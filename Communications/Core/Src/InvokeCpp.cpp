@@ -47,6 +47,7 @@ void InvokeCpp(UART_HandleTypeDef* radioUart, UART_HandleTypeDef* gpsUart)
 	while (true)
 	{
 		board.Update();
+		board.Info("Test");
 
 		if (HAL_GetTick() - last > 1250)
 		{
