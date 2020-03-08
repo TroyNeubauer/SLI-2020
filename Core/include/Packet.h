@@ -70,7 +70,7 @@ struct PacketHeader
 
 };
 
-static_assert( &(((PacketHeader*) nullptr)->CRC32) == 0, "CRC must start at offset 0");
+static_assert(offsetof(PacketHeader, CRC32) == 0, "CRC must start at offset 0");
 
 
 const int MAX_PACKET_DATA_SIZE = 256;

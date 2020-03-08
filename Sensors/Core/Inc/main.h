@@ -55,6 +55,20 @@ void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
 
+void UART_DMA_Interupt(DMA_HandleTypeDef* dma);
+
+void CLog(const char* message);
+void My_Error_Handler(void);
+void DelayUS(uint16_t us);
+
+
+void UARTWrite(UART_HandleTypeDef* uart, const void* data, uint32_t length);
+void UARTRead(UART_HandleTypeDef* uart, void* data, uint32_t length);
+
+void UARTWriteSync(UART_HandleTypeDef* uart, const void* data, uint32_t length);
+void UARTReadSync(UART_HandleTypeDef* uart, void* data, uint32_t length);
+
+
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/

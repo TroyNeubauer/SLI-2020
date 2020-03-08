@@ -64,9 +64,6 @@ void DelayUS(uint16_t us);
 
 void Lights(int count);
 
-char IsUARTWriteReady(USART_TypeDef* usart);
-
-
 void UARTWrite(UART_HandleTypeDef* uart, const void* data, uint32_t length);
 void UARTRead(UART_HandleTypeDef* uart, void* data, uint32_t length);
 

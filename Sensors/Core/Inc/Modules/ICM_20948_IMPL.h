@@ -21,7 +21,7 @@ A C++ interface to the ICM-20948
 class ICM_20948
 {
 private:
-protected:
+public:
     ICM_20948_Device_t _device;
 
     float getTempC(int16_t val);
