@@ -97,7 +97,7 @@ int main(void)
 {
   /* USER CODE BEGIN 1 */
 
-   //CLOG("Communications board starting...");
+   CLog("Communications board starting...");
   /* USER CODE END 1 */
   
 
@@ -107,7 +107,7 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
-  //CLOG("HAL Init complete");
+  CLog("HAL Init complete");
   initStage = INIT_STAGE_HAL;
   /* USER CODE END Init */
 
@@ -115,7 +115,7 @@ int main(void)
   SystemClock_Config();
 
   /* USER CODE BEGIN SysInit */
-  //CLOG("System clock config complete");
+  CLog("System clock config complete");
   initStage = INIT_STAGE_SYSTEM_CLOCK;
   /* USER CODE END SysInit */
 
@@ -124,7 +124,7 @@ int main(void)
   MX_USART1_UART_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
-  //CLOG("Peripheral initialization complete");
+  CLog("Peripheral initialization complete");
   initStage = INIT_STAGE_PERHIPERALS;
   /* USER CODE END 2 */
  
@@ -132,8 +132,8 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  //CLOG("Invoking C++ code");
-  //InvokeCpp(RADIO_UART, GPS_UART);
+  CLog("Invoking C++ code");
+  InvokeCpp(RADIO_UART, GPS_UART);
   while (1)
   {
     /* USER CODE END WHILE */
