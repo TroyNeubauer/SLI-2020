@@ -48,7 +48,7 @@ void InvokeCpp(UART_HandleTypeDef* f103Uart, UART_HandleTypeDef* debugUart, SPI_
 
 		if (HAL_GetTick() - last > 1250)
 		{
-			HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_8);
+			HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
 			last = HAL_GetTick();
 		}
 	}
@@ -133,7 +133,6 @@ void SerialPrint(Formatter&& formatter, LogLevelType level)
 */
 	formatter << "..\n\r";
 	UARTWrite(s_DebugUart, formatter.Data(), formatter.Size());
-	HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_9);
 
 }
 

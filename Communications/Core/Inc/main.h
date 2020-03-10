@@ -73,6 +73,12 @@ void UARTReadSync(UART_HandleTypeDef* uart, void* data, uint32_t length);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define ERROR_LED_Pin GPIO_PIN_14
+#define ERROR_LED_GPIO_Port GPIOB
+#define LED_Pin GPIO_PIN_15
+#define LED_GPIO_Port GPIOB
+#define GPS_Enable_Pin GPIO_PIN_8
+#define GPS_Enable_GPIO_Port GPIOA
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */

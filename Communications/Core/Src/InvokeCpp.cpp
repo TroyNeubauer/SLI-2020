@@ -29,6 +29,13 @@ SizedFormatter<256> cLog;
 
 void InvokeCpp(UART_HandleTypeDef* radioUart, UART_HandleTypeDef* gpsUart)
 {
+	while(true) {
+		HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+		HAL_Delay(1000);
+		HAL_GPIO_TogglePin(ERROR_LED_GPIO_Port, ERROR_LED_Pin);
+		HAL_Delay(200);
+	}
+
 	s_RadioUart = radioUart;
 	s_gpsUart = gpsUart;
 
@@ -50,7 +57,7 @@ void InvokeCpp(UART_HandleTypeDef* radioUart, UART_HandleTypeDef* gpsUart)
 
 		if (HAL_GetTick() - last > 1250)
 		{
-			HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_12);
+			HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
 			last = HAL_GetTick();
 			board.Info("Test message!");
 		}
@@ -63,11 +70,6 @@ void CLog(const char* message)
 	cLog << message << '\n';
 }
 
-void UART_DMA_Interupt(DMA_HandleTypeDef* dma)
-{
-	//s_ActiveDMA[GetDMAIndex(dma)][dmaChannel] = false;
-	//LL_GPIO_TogglePin(GPIOB, LL_GPIO_PIN_12);
-}
 
 void UARTWrite(UART_HandleTypeDef* channel, const void* data, uint32_t length)
 {
@@ -87,11 +89,6 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef* huart)
 }
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef* huart)
-{
-
-}
-
-void HAL_UART_RxHalfCpltCallback(UART_HandleTypeDef* huart)
 {
 
 }
