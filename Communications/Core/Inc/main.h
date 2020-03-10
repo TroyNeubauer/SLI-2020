@@ -79,6 +79,8 @@ void UARTReadSync(UART_HandleTypeDef* uart, void* data, uint32_t length);
 #define LED_GPIO_Port GPIOB
 #define GPS_Enable_Pin GPIO_PIN_8
 #define GPS_Enable_GPIO_Port GPIOA
+#define SD_CS_Pin GPIO_PIN_11
+#define SD_CS_GPIO_Port GPIOA
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */
