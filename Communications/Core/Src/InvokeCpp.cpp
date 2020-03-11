@@ -6,6 +6,7 @@
 
 #include "Modules/CommunicationsBoard.h"
 #include "Modules/GPS.h"
+#include "Modules/SDCard.h"
 #include "main.h"
 
 #include "Core.h"
@@ -29,25 +30,25 @@ SizedFormatter<256> cLog;
 
 void InvokeCpp(UART_HandleTypeDef* radioUart, UART_HandleTypeDef* gpsUart)
 {
-	while(true) {
-		HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-		HAL_Delay(1000);
-		HAL_GPIO_TogglePin(ERROR_LED_GPIO_Port, ERROR_LED_Pin);
-		HAL_Delay(200);
-	}
+	Lights(1); Lights(2); Lights(3);
 
 	s_RadioUart = radioUart;
 	s_gpsUart = gpsUart;
 
 	SerialPrint(cLog, LL_INFO);
-
 	CommunicationsBoard board(radioUart, gpsUart);
+
 	boardPtr = &board;
 	board.Init();
 
-	GPS gps(&board, gpsUart);
+	SDCard sdcard;
+	sdcard.Init();
+	sdcard.Open("logFile.txt");
+	sdcard.Write("testing123");
 
-	board.AddModule(&gps);
+	//GPS gps(&board, gpsUart);
+	//board.AddModule(&gps);
+
 	board.Info("Starting loop");
 
 	int last = HAL_GetTick();

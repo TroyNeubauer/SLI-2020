@@ -91,7 +91,6 @@ void SLICoreModule::AddModule(SLIModule* module)
 	formatter << "Added module! ID " << module->GetIntID();
 	Info(formatter);
 	module->Init();
-
 }
 
 SLIModule* SLICoreModule::GetModule(ModuleIDType id)

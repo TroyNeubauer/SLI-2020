@@ -20,7 +20,6 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "fatfs.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -79,11 +78,12 @@ static void MX_SPI1_Init(void);
 
 void Lights(int count)
 {
+	HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_RESET);
 	for (int i = 0; i < count; i++)
 	{
-		HAL_Delay(100);
+		HAL_Delay(500);
 		HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_SET);
-		HAL_Delay(100);
+		HAL_Delay(500);
 		HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_RESET);
 	}
 	HAL_Delay(1000);
@@ -91,16 +91,16 @@ void Lights(int count)
 
 void Error_Lights(int count)
 {
+	HAL_GPIO_WritePin(ERROR_LED_GPIO_Port, ERROR_LED_Pin, GPIO_PIN_RESET);
 	for (int i = 0; i < count; i++)
 	{
-		HAL_Delay(100);
+		HAL_Delay(500);
 		HAL_GPIO_WritePin(ERROR_LED_GPIO_Port, ERROR_LED_Pin, GPIO_PIN_SET);
-		HAL_Delay(100);
+		HAL_Delay(500);
 		HAL_GPIO_WritePin(ERROR_LED_GPIO_Port, ERROR_LED_Pin, GPIO_PIN_RESET);
 	}
 	HAL_Delay(1000);
 }
-
 
 /* USER CODE END 0 */
 
@@ -111,7 +111,6 @@ void Error_Lights(int count)
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-
    CLog("Communications board starting...");
   /* USER CODE END 1 */
   
@@ -141,6 +140,7 @@ int main(void)
   MX_SPI1_Init();
   MX_FATFS_Init();
   /* USER CODE BEGIN 2 */
+
   CLog("Peripheral initialization complete");
   initStage = INIT_STAGE_PERHIPERALS;
   /* USER CODE END 2 */
