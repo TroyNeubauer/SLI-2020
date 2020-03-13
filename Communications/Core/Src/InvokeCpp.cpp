@@ -30,24 +30,26 @@ SizedFormatter<256> cLog;
 
 void InvokeCpp(UART_HandleTypeDef* radioUart, UART_HandleTypeDef* gpsUart)
 {
-	Lights(1); Lights(2); Lights(3);
+	Lights(1);
+	Error_Lights(1);
 
 	s_RadioUart = radioUart;
 	s_gpsUart = gpsUart;
 
-	SerialPrint(cLog, LL_INFO);
 	CommunicationsBoard board(radioUart, gpsUart);
 
 	boardPtr = &board;
 	board.Init();
 
+	SerialPrint(cLog, LL_INFO);
+
+	GPS gps(&board, gpsUart);
+	board.AddModule(&gps);
+
 	SDCard sdcard;
 	sdcard.Init();
-	sdcard.Open("logFile.txt");
-	sdcard.Write("testing123");
-
-	//GPS gps(&board, gpsUart);
-	//board.AddModule(&gps);
+	sdcard.Open("logTest1.txt");
+	board.SetSDCard(&sdcard);
 
 	board.Info("Starting loop");
 
@@ -60,7 +62,6 @@ void InvokeCpp(UART_HandleTypeDef* radioUart, UART_HandleTypeDef* gpsUart)
 		{
 			HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
 			last = HAL_GetTick();
-			board.Info("Test message!");
 		}
 	}
 }
@@ -129,8 +130,7 @@ void SerialPrint(Formatter&& formatter, LogLevelType level)
 
 	header->CRC32 = buf.CalculateCRC32();
 
-	UARTWrite(s_RadioUart, buf.Begin(), buf.Offset());
-
+	boardPtr->SendPacket(buf);
 }
 
 void SLIAssertFailed(const char* message)

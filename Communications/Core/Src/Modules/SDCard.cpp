@@ -26,21 +26,32 @@ SDCard::SDCard() {
 }
 
 const char * SDCard::Init() {
-	return tresult[f_mount(&fs, "", 0)];
+	FRESULT fresult = f_mount(&fs, "", 0);
+	Error_Lights(fresult);
+	return tresult[fresult];
 }
 
 const char * SDCard::Open(const char * path) {
-	return tresult[f_open(&fil, path, FA_OPEN_ALWAYS | FA_READ | FA_WRITE)];
+	FRESULT fresult = f_open(&fil, path, FA_OPEN_ALWAYS | FA_READ | FA_WRITE);
+	Error_Lights(fresult);
+	return tresult[fresult];
 }
 
 const char * SDCard::Close() {
-	return tresult[f_close(&fil)];
+	FRESULT fresult = f_close(&fil);
+	Error_Lights(fresult);
+	return tresult[fresult];
 }
 const char * SDCard::Write(const char* buff) {
+	return Write(buff, strlen(buff));
+}
+
+const char * SDCard::Write(const void* buff, int length) {
 	UINT bw;
-	f_write(&fil, buff, strlen(buff), &bw);
+	FRESULT fresult = f_write(&fil, buff, length, &bw);
 	f_sync(&fil);
-	return "ok";
+	Error_Lights(fresult);
+	return tresult[fresult];
 }
 
 SDCard::~SDCard() {

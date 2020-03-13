@@ -16,5 +16,6 @@ public:
 	const char * Open(const char * path);
 	const char * Close();
 	const char * Write(const char* buff);
+	const char * Write(const void* buff, int length);
 	~SDCard();
 };

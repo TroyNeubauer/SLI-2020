@@ -10,6 +10,7 @@
 #include "Packet.h"
 #include "Modules/SensorsBoard.h"
 #include "Modules/ICM20948.h"
+#include "Modules/BMP388.h"
 
 SensorsBoard* boardPtr = nullptr;
 
@@ -27,6 +28,8 @@ SizedFormatter<256> cLog;
 
 void InvokeCpp(UART_HandleTypeDef* f103Uart, UART_HandleTypeDef* debugUart, SPI_HandleTypeDef* spi)
 {
+	Lights(5);
+
 	s_F103Uart = f103Uart;
 	s_DebugUart = debugUart;
 	SerialPrint(cLog, LL_INFO);
@@ -38,8 +41,25 @@ void InvokeCpp(UART_HandleTypeDef* f103Uart, UART_HandleTypeDef* debugUart, SPI_
 	ICM20948 icm(&board, spi);
 	board.AddModule(&icm);
 
-
 	board.Info("Starting loop");
+
+	PRESS_EN_SENSOR_TYPY enPressureType;
+	pressSensorInit( &enPressureType );
+  	if(PRESS_EN_SENSOR_TYPY_BMP388 == enPressureType)
+	{
+		Lights(2);
+	}
+	else
+	{
+		Error_Lights(1);
+	}
+
+  	board.Info("test1");
+  	board.Info("test2");
+
+  	DefaultFormatter f;
+  	f << "testing" << (uint32_t) enPressureType;
+  	board.Info(f);
 
 	int last = HAL_GetTick();
 	while (true)

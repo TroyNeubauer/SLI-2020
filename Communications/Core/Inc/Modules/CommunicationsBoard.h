@@ -8,6 +8,8 @@
 #include "stm32f1xx_hal_dma.h"
 #include "stm32f1xx_hal_dma_ex.h"
 
+class SDCard;
+
 class CommunicationsBoard : public SLICoreModule
 {
 public:
@@ -15,6 +17,7 @@ public:
 
 	virtual void Init();
 	virtual void Update();
+	inline void SetSDCard(SDCard* sd) {m_SDCard = sd;}
 
 public:
 	static CommunicationsBoard& GetInstance();
@@ -26,5 +29,6 @@ private:
 private:
 	UART_HandleTypeDef* m_RadioUART;
 	UART_HandleTypeDef* m_GPSUART;
+	SDCard* m_SDCard = nullptr;
 };
 

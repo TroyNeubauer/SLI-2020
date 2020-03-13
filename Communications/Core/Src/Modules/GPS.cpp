@@ -14,7 +14,6 @@ void GPS::Init()
 	Trace("GPS::Init");
 	NMEASend("PMTK251,115200");
 	Trace("Sent GPS baud rate change command");
-
 	DelayUS(100);
 
 	//Re init gps
@@ -25,14 +24,10 @@ void GPS::Init()
 		Error("Failed to change GPS baud rate to 115200 b/s");
 		return;
 	}
-
 	Info("Changed GPS baud rate to 115200 b/s");
-
 	NMEASend("PMTK220,100");
 	NMEASend("PMTK314,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0");
-
-	UARTRead(m_gpsUART, gpsBuf, sizeof(gpsBuf));
-
+	UARTRead(m_gpsUART, &gpsBuf, sizeof(gpsBuf));
 }
 
 uint32_t lastPos = 0;
@@ -57,7 +52,6 @@ void GPS::Update()
 			header->Type = PacketType::DATA;
 
 			DataPacket_GPS* messagePacket = buf.Ptr<DataPacket_GPS>();
-
 
 			if (currentPos > lastPos)
 			{
