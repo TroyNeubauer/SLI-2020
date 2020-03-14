@@ -70,6 +70,31 @@ static void MX_USART3_UART_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+void Lights(int count)
+{
+	HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_RESET);
+	for (int i = 0; i < count; i++)
+	{
+		HAL_Delay(500);
+		HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_SET);
+		HAL_Delay(500);
+		HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_RESET);
+	}
+	HAL_Delay(1000);
+}
+
+void Error_Lights(int count)
+{
+	HAL_GPIO_WritePin(ERROR_LED_GPIO_Port, ERROR_LED_Pin, GPIO_PIN_RESET);
+	for (int i = 0; i < count; i++)
+	{
+		HAL_Delay(500);
+		HAL_GPIO_WritePin(ERROR_LED_GPIO_Port, ERROR_LED_Pin, GPIO_PIN_SET);
+		HAL_Delay(500);
+		HAL_GPIO_WritePin(ERROR_LED_GPIO_Port, ERROR_LED_Pin, GPIO_PIN_RESET);
+	}
+	HAL_Delay(1000);
+}
 
 /* USER CODE END 0 */
 
@@ -277,13 +302,16 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOC_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOB, ALT_CS_Pin|ACC_CS_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOC, LED_Pin|ERROR_LED_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pins : PB12 PB13 PB14 */
-  GPIO_InitStruct.Pin = GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14;
+  /*Configure GPIO pins : PB12 ALT_CS_Pin ACC_CS_Pin */
+  GPIO_InitStruct.Pin = GPIO_PIN_12|ALT_CS_Pin|ACC_CS_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
@@ -326,27 +354,7 @@ void My_Error_Handler(void)
 {
 	/* USER CODE BEGIN Error_Handler_Debug */
 	/* User can add his own implementation to report the HAL error return state */
-	while (1)
-	{
-		const int flashCount = 5;
-		const int onTime = 40, offTime = 200;
-		//How often to show the flashes
-		const int cycleTime = 2000;
-		const int waitTime = cycleTime - (flashCount * onTime + flashCount * offTime);
-
-		for (int i = 0; i < flashCount; i++)
-		{
-			HAL_GPIO_TogglePin(ERROR_LED_GPIO_Port, ERROR_LED_Pin);
-			HAL_Delay(onTime);
-			HAL_GPIO_TogglePin(ERROR_LED_GPIO_Port, ERROR_LED_Pin);
-			HAL_Delay(offTime);
-		}
-		if (waitTime > 0)
-		{
-			HAL_Delay(waitTime);
-		}
-
-	}
+	Error_Lights(10);
 	/* USER CODE END Error_Handler_Debug */
 }
 
@@ -369,27 +377,7 @@ void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
 	/* User can add his own implementation to report the HAL error return state */
-	while (1)
-	{
-		const int flashCount = 5;
-		const int onTime = 40, offTime = 200;
-		//How often to show the flashes
-		const int cycleTime = 2000;
-		const int waitTime = cycleTime - (flashCount * onTime + flashCount * offTime);
-
-		for (int i = 0; i < flashCount; i++)
-		{
-			HAL_GPIO_TogglePin(ERROR_LED_GPIO_Port, ERROR_LED_Pin);
-			HAL_Delay(onTime);
-			HAL_GPIO_TogglePin(ERROR_LED_GPIO_Port, ERROR_LED_Pin);
-			HAL_Delay(offTime);
-		}
-		if (waitTime > 0)
-		{
-			HAL_Delay(waitTime);
-		}
-
-	}
+	Error_Lights(10);
   /* USER CODE END Error_Handler_Debug */
 }
 

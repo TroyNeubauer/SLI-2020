@@ -4,9 +4,9 @@
 #include "Core.h"
 
 #include "main.h"
+#include "Modules/SDCard.h"
 
 static CommunicationsBoard* s_Instance = nullptr;
-
 
 CommunicationsBoard& CommunicationsBoard::GetInstance()
 {
@@ -20,7 +20,6 @@ CommunicationsBoard::CommunicationsBoard(UART_HandleTypeDef* radioUART, UART_Han
 {
 	s_Instance = this;
 }
-
 
 void CommunicationsBoard::Init()
 {
@@ -39,7 +38,9 @@ void CommunicationsBoard::RoutePacket(PacketBuffer& packet)
 	if (header->Destination == ModuleID::GROUND_STATION)
 	{
 		UARTWrite(m_RadioUART, packet.Begin(), packet.Offset());
-
+		if(m_SDCard) {
+			m_SDCard->Write(packet.Begin(), packet.Offset());
+		}
 	}
 	else if (header->Destination == ModuleID::STM32F205)
 	{

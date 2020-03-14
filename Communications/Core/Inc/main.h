@@ -62,6 +62,7 @@ void My_Error_Handler(void);
 void DelayUS(uint16_t us);
 
 void Lights(int count);
+void Error_Lights(int count);
 
 void UARTWrite(UART_HandleTypeDef* uart, const void* data, uint32_t length);
 void UARTRead(UART_HandleTypeDef* uart, void* data, uint32_t length);

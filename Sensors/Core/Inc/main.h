@@ -57,6 +57,9 @@ void Error_Handler(void);
 
 void UART_DMA_Interupt(DMA_HandleTypeDef* dma);
 
+void Lights(int count);
+void Error_Lights(int count);
+
 void CLog(const char* message);
 void My_Error_Handler(void);
 void DelayUS(uint16_t us);
@@ -72,6 +75,10 @@ void UARTReadSync(UART_HandleTypeDef* uart, void* data, uint32_t length);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define ALT_CS_Pin GPIO_PIN_13
+#define ALT_CS_GPIO_Port GPIOB
+#define ACC_CS_Pin GPIO_PIN_14
+#define ACC_CS_GPIO_Port GPIOB
 #define LED_Pin GPIO_PIN_8
 #define LED_GPIO_Port GPIOC
 #define ERROR_LED_Pin GPIO_PIN_9

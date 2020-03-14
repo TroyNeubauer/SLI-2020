@@ -52,11 +52,23 @@
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+volatile uint8_t FatFsCnt = 0;
+volatile uint8_t Timer1, Timer2;
 
+void SDTimer_Handler(void)
+{
+  if(Timer1 > 0)
+    Timer1--;
+
+  if(Timer2 > 0)
+    Timer2--;
+}
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
-
+extern DMA_HandleTypeDef hdma_usart1_rx;
+extern DMA_HandleTypeDef hdma_usart2_rx;
+extern DMA_HandleTypeDef hdma_usart3_rx;
 /* USER CODE BEGIN EV */
 
 /* USER CODE END EV */
@@ -182,7 +194,12 @@ void PendSV_Handler(void)
 void SysTick_Handler(void)
 {
   /* USER CODE BEGIN SysTick_IRQn 0 */
-
+	FatFsCnt++;
+	if(FatFsCnt >= 10)
+	{
+		FatFsCnt = 0;
+		SDTimer_Handler();
+	}
   /* USER CODE END SysTick_IRQn 0 */
   HAL_IncTick();
   /* USER CODE BEGIN SysTick_IRQn 1 */
@@ -196,6 +213,48 @@ void SysTick_Handler(void)
 /* For the available peripheral interrupt handler names,                      */
 /* please refer to the startup file (startup_stm32f1xx.s).                    */
 /******************************************************************************/
+
+/**
+  * @brief This function handles DMA1 channel3 global interrupt.
+  */
+void DMA1_Channel3_IRQHandler(void)
+{
+  /* USER CODE BEGIN DMA1_Channel3_IRQn 0 */
+
+  /* USER CODE END DMA1_Channel3_IRQn 0 */
+  HAL_DMA_IRQHandler(&hdma_usart3_rx);
+  /* USER CODE BEGIN DMA1_Channel3_IRQn 1 */
+
+  /* USER CODE END DMA1_Channel3_IRQn 1 */
+}
+
+/**
+  * @brief This function handles DMA1 channel5 global interrupt.
+  */
+void DMA1_Channel5_IRQHandler(void)
+{
+  /* USER CODE BEGIN DMA1_Channel5_IRQn 0 */
+
+  /* USER CODE END DMA1_Channel5_IRQn 0 */
+  HAL_DMA_IRQHandler(&hdma_usart1_rx);
+  /* USER CODE BEGIN DMA1_Channel5_IRQn 1 */
+
+  /* USER CODE END DMA1_Channel5_IRQn 1 */
+}
+
+/**
+  * @brief This function handles DMA1 channel6 global interrupt.
+  */
+void DMA1_Channel6_IRQHandler(void)
+{
+  /* USER CODE BEGIN DMA1_Channel6_IRQn 0 */
+
+  /* USER CODE END DMA1_Channel6_IRQn 0 */
+  HAL_DMA_IRQHandler(&hdma_usart2_rx);
+  /* USER CODE BEGIN DMA1_Channel6_IRQn 1 */
+
+  /* USER CODE END DMA1_Channel6_IRQn 1 */
+}
 
 /* USER CODE BEGIN 1 */
 
