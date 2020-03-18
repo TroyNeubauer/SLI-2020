@@ -38,7 +38,8 @@ void CommunicationsBoard::RoutePacket(PacketBuffer& packet)
 	if (header->Destination == ModuleID::GROUND_STATION)
 	{
 		UARTWrite(m_RadioUART, packet.Begin(), packet.Offset());
-		if(m_SDCard) {
+		if(m_SDCard)
+		{
 			m_SDCard->Write(packet.Begin(), packet.Offset());
 		}
 	}

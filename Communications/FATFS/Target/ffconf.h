@@ -82,7 +82,7 @@
 / Locale and Namespace Configurations
 /-----------------------------------------------------------------------------*/
 
-#define _CODE_PAGE         850
+#define _CODE_PAGE         1
 /* This option specifies the OEM code page to be used on the target system.
 /  Incorrect setting of the code page can cause a file open failure.
 /
@@ -113,7 +113,7 @@
 /   874  - Thai (OEM, Windows)
 /   1    - ASCII (No extended character. Valid for only non-LFN configuration.) */
 
-#define _USE_LFN     1    /* 0 to 3 */
+#define _USE_LFN     0    /* 0 to 3 */
 #define _MAX_LFN     255    /* Maximum LFN length to handle (12 to 255) */
 /* The _USE_LFN option switches the LFN feature.
 /
@@ -133,7 +133,7 @@
 /  To use Unicode string for the path name, enable LFN feature and set _LFN_UNICODE
 /  to 1. This option also affects behavior of string I/O functions. */
 
-#define _STRF_ENCODE    3
+#define _STRF_ENCODE    0
 /* When _LFN_UNICODE is 1, this option selects the character encoding on the file to
 /  be read/written via string I/O functions, f_gets(), f_putc(), f_puts and f_printf().
 /

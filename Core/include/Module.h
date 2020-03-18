@@ -6,12 +6,8 @@
 #include <array>
 #include <cstddef>
 
-#include "Formatter.h"
-
-#include "Packet.h"
+#include "Buffer.h"
 #include "Module.h"
-
-class PacketBuffer;
 
 using ModuleIDType = uint8_t;
 
@@ -25,9 +21,10 @@ namespace ModuleID
 const char* GetModuleIDName(ModuleIDType id);
 
 //Implemented by each parent-module
-extern void SerialPrint(Formatter& formatter, LogLevelType level);
-extern void SerialPrint(Formatter&& formatter, LogLevelType level);
+extern void SerialPrint(Formatter& formatter, ModuleIDType from, LogLevelType level);
+extern void SerialPrint(Formatter&& formatter, ModuleIDType from, LogLevelType level);
 extern const char* GetParentModuleName();
+extern void NewPacketImpl(PacketBuffer& buffer, PacketTypeValue type, ModuleIDType from);
 
 
 class SLILogable
@@ -51,6 +48,7 @@ public:
 
 };
 
+
 class SLICoreModule;
 struct PacketHeader;
 
@@ -66,7 +64,9 @@ public:
 	virtual void RecievePacket(PacketBuffer& packet) = 0;
 	virtual inline ModuleIDType GetID() const { return m_ModuleID; }
 
-	inline int32_t GetIntID() const { return static_cast<int32_t>(m_ModuleID); }
+	template<std::size_t Len>
+	void NewPacket(StackBuffer<Len>& buf, PacketTypeValue type) { NewPacketImpl(buf, type, GetID()); }
+
 	void SendPacket(PacketBuffer& packet);
 	void Log(const char* message);
 
@@ -102,6 +102,9 @@ public:
 	bool HasModule(ModuleIDType id);
 	void AddModule(SLIModule* module);
 	SLIModule* GetModule(ModuleIDType id);
+
+	template<std::size_t Len>
+	void NewPacket(StackBuffer<Len>& buf, PacketTypeValue type) { NewPacketImpl(buf, type, GetID()); }
 
 	virtual ModuleIDType GetID() const { return m_ModuleID; }
 

@@ -57,7 +57,6 @@ void Error_Handler(void);
 
 void UART_DMA_Interupt(DMA_HandleTypeDef* dma);
 
-void CLog(const char* message);
 void My_Error_Handler(void);
 void DelayUS(uint16_t us);
 

@@ -17,110 +17,88 @@ SensorsBoard* boardPtr = nullptr;
 UART_HandleTypeDef* s_F103Uart = nullptr;
 UART_HandleTypeDef* s_DebugUart = nullptr;
 
-void SerialPrint(Formatter& formatter, LogLevelType level);
-void SerialPrint(Formatter&& formatter, LogLevelType level);
+void SerialPrint(Formatter& formatter, ModuleIDType from, LogLevelType level);
+void SerialPrint(Formatter&& formatter, ModuleIDType from, LogLevelType level);
 
 const char* GetParentModuleName();
 
 extern "C"
 {
-SizedFormatter<256> cLog;
+	SizedFormatter<256> cLog;
 
-void InvokeCpp(UART_HandleTypeDef* f103Uart, UART_HandleTypeDef* debugUart, SPI_HandleTypeDef* spi)
-{
-	Lights(5);
-
-	s_F103Uart = f103Uart;
-	s_DebugUart = debugUart;
-	SerialPrint(cLog, LL_INFO);
-
-	SensorsBoard board(f103Uart);
-	boardPtr = &board;
-	board.Init();
-
-	ICM20948 icm(&board, spi);
-	board.AddModule(&icm);
-
-	board.Info("Starting loop");
-
-	PRESS_EN_SENSOR_TYPY enPressureType;
-	pressSensorInit( &enPressureType );
-  	if(PRESS_EN_SENSOR_TYPY_BMP388 == enPressureType)
+	void InvokeCpp(UART_HandleTypeDef* f103Uart, UART_HandleTypeDef* debugUart, SPI_HandleTypeDef* spi)
 	{
-		Lights(2);
-	}
-	else
-	{
-		Error_Lights(1);
-	}
+		Lights(5);
 
-  	board.Info("test1");
-  	board.Info("test2");
+		s_F103Uart = f103Uart;
+		s_DebugUart = debugUart;
+		SerialPrint(cLog, ModuleID::STM32F205, LL_INFO);
 
-  	DefaultFormatter f;
-  	f << "testing" << (uint32_t) enPressureType;
-  	board.Info(f);
+		SensorsBoard board(f103Uart);
+		boardPtr = &board;
+		board.Init();
 
-	int last = HAL_GetTick();
-	while (true)
-	{
-		board.Update();
+		ICM20948 icm(&board, spi);
+		board.AddModule(&icm);
 
-		if (HAL_GetTick() - last > 1250)
+		board.Info("Starting loop");
+
+		PRESS_EN_SENSOR_TYPY enPressureType;
+		pressSensorInit( &enPressureType );
+		if(PRESS_EN_SENSOR_TYPY_BMP388 == enPressureType)
 		{
-			HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-			last = HAL_GetTick();
+			Lights(2);
+		}
+		else
+		{
+			Error_Lights(1);
+		}
+
+		board.Info("test1");
+		board.Info("test2");
+
+		DefaultFormatter f;
+		f << "testing" << (uint32_t) enPressureType;
+		board.Info(f);
+
+		int last = HAL_GetTick();
+		while (true)
+		{
+			board.Update();
+
+			if (HAL_GetTick() - last > 1250)
+			{
+				HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+				last = HAL_GetTick();
+			}
 		}
 	}
+
+	void CLog(const char* message)
+	{
+		cLog << '[' << GetParentModuleName() << " (C code)]: ";
+		cLog << message << '\n';
+	}
+
+
+	void UARTWrite(UART_HandleTypeDef* channel, const void* data, uint32_t length)
+	{
+		HAL_UART_Transmit(channel, reinterpret_cast<uint8_t*>(const_cast<void*>(data)), length, HAL_MAX_DELAY);
+	}
+
+	void UARTRead(UART_HandleTypeDef* uart, void* data, uint32_t length)
+	{
+		HAL_UART_Receive_DMA(uart, reinterpret_cast<uint8_t*>(data), length);
+	}
+
 }
 
-void CLog(const char* message)
+void SerialPrint(Formatter& formatter, ModuleIDType from, LogLevelType level)
 {
-	cLog << '[' << GetParentModuleName() << " (C code)]: ";
-	cLog << message << '\n';
+	SerialPrint(std::move(formatter), from, level);
 }
 
-void UART_DMA_Interupt(DMA_HandleTypeDef* dma)
-{
-	//s_ActiveDMA[GetDMAIndex(dma)][dmaChannel] = false;
-	//LL_GPIO_TogglePin(GPIOB, LL_GPIO_PIN_12);
-}
-
-void UARTWrite(UART_HandleTypeDef* channel, const void* data, uint32_t length)
-{
-	HAL_UART_Transmit(channel, reinterpret_cast<uint8_t*>(const_cast<void*>(data)), length, HAL_MAX_DELAY);
-}
-
-void UARTRead(UART_HandleTypeDef* uart, void* data, uint32_t length)
-{
-	HAL_UART_Receive_DMA(uart, reinterpret_cast<uint8_t*>(data), length);
-}
-
-void HAL_UART_TxCpltCallback(UART_HandleTypeDef* huart)
-{
-	DefaultFormatter formatter;
-	formatter << "HAL_UART_TxCpltCallback: Read " << " bytes";
-	UARTWriteSync(s_F103Uart, formatter.c_str(), formatter.Size());
-}
-
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef* huart)
-{
-
-}
-
-void HAL_UART_RxHalfCpltCallback(UART_HandleTypeDef* huart)
-{
-
-}
-
-}
-
-void SerialPrint(Formatter& formatter, LogLevelType level)
-{
-	SerialPrint(std::move(formatter), level);
-}
-
-void SerialPrint(Formatter&& formatter, LogLevelType level)
+void SerialPrint(Formatter&& formatter, ModuleIDType from, LogLevelType level)
 {
 	if (s_F103Uart == nullptr)
 	{
@@ -155,6 +133,7 @@ void SerialPrint(Formatter&& formatter, LogLevelType level)
 	UARTWrite(s_DebugUart, formatter.Data(), formatter.Size());
 
 }
+
 
 void SLIAssertFailed(const char* message)
 {

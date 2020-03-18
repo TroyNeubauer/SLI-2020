@@ -11,7 +11,7 @@ namespace PacketType {
 	//This is the first packet that will be sent for a device
 	constexpr PacketTypeValue INIT = 1;
 
-	//The module has entered a different status (GPS lock, accelerometer mode set, etc.)
+	//The module has entered a different status (GPS lock, accelerometer mode set, error status, etc.)
 	constexpr PacketTypeValue STATUS = 2;
 
 	//This module is sending new data (altitude reading, velocity, etc.)
@@ -26,9 +26,8 @@ namespace PacketType {
 	//A device is asking another device for something
 	constexpr PacketTypeValue RESPONSE = 6;
 
-
 	//Used to identify array sizes (not an actual enum value)
-	constexpr PacketTypeValue MAX_PACKET_TYPE = 7;
+	constexpr PacketTypeValue MAX_PACKET_TYPE = 8;
 }
 
 using RequestTypeValue = uint8_t;
@@ -43,21 +42,17 @@ using StatusTypeValue = uint8_t;
 
 namespace StatusValue {
 
-	constexpr StatusTypeValue GPS_LOCK = 0;
-	constexpr StatusTypeValue GPS_10HZ = 1;
-	constexpr StatusTypeValue GPS_115200_BAUD_RATE = 1;
+	constexpr StatusTypeValue MODULE_ERROR = 0;//A module defined error code is encoded after this struct
+	constexpr StatusTypeValue GPS_LOCK = 1;
+	constexpr StatusTypeValue GPS_10HZ = 2;
+	constexpr StatusTypeValue GPS_115200_BAUD_RATE = 3;
 
 }
 
 using ModuleIDType = uint8_t;
 
-const uint8_t MAGIC_VALUE = 0xDD;
-
 struct PacketHeader
 {
-	uint32_t CRC32;
-
-	uint32_t ID;
 	uint32_t UnixSeconds;//The time this packet was sent at
 	uint32_t NanoSeconds;
 
@@ -70,13 +65,8 @@ struct PacketHeader
 
 };
 
-static_assert(offsetof(PacketHeader, CRC32) == 0, "CRC must start at offset 0");
+const int MAX_PACKET_SIZE = 256;
 
-
-const int MAX_PACKET_DATA_SIZE = 256;
-
-
-uint32_t CRC32Impl(const uint8_t* data, std::size_t bytes);
 
 
 //All the data needed is inside the packet header so there is no point in having an empty struct
@@ -85,7 +75,6 @@ struct InitPacket
 {
 };
 
-static_assert(sizeof(InitPacket) == 4, "InitPacket is wrong size");
 */
 
 
@@ -96,8 +85,16 @@ struct StatusPacket
 
 static_assert(sizeof(StatusPacket) == 1, "StatusPacket is wrong size");
 
+struct ErrorStatusPacket
+{
+	int32_t ErrorCode : 24;
+	int32_t Operation : 8;
+};
 
-const uint32_t MAX_NMEA_LENGTH = 90;//TODO. Double check this
+static_assert(sizeof(ErrorStatusPacket) == 4, "StatusPacket is wrong size");
+
+
+
 
 struct DataPacket_GPS
 {
@@ -112,12 +109,12 @@ static_assert(sizeof(DataPacket_GPS) == 1, "DataPacket_GPS is wrong size");
 
 struct DataPacket_STMF103
 {
-
+	uint32_t UpdateLoopHZ;
 };
 
 struct DataPacket_STMF205
 {
-
+	uint32_t UpdateLoopHZ;
 };
 
 const uint32_t MAX_MESSAGE_LENGTH = 256;
@@ -128,7 +125,7 @@ constexpr LogLevelType LL_TRACE = 0;
 constexpr LogLevelType LL_INFO = 1;
 constexpr LogLevelType LL_WARN = 2;
 constexpr LogLevelType LL_ERROR = 3;
-
+constexpr LogLevelType MAX_MESSAGE_LEVEL = 4;
 
 struct MessagePacket
 {

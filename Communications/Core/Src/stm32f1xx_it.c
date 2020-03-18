@@ -1,21 +1,21 @@
 /* USER CODE BEGIN Header */
 /**
-  ******************************************************************************
-  * @file    stm32f1xx_it.c
-  * @brief   Interrupt Service Routines.
-  ******************************************************************************
-  * @attention
-  *
-  * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
-  * All rights reserved.</center></h2>
-  *
-  * This software component is licensed by ST under BSD 3-Clause license,
-  * the "License"; You may not use this file except in compliance with the
-  * License. You may obtain a copy of the License at:
-  *                        opensource.org/licenses/BSD-3-Clause
-  *
-  ******************************************************************************
-  */
+ ******************************************************************************
+ * @file    stm32f1xx_it.c
+ * @brief   Interrupt Service Routines.
+ ******************************************************************************
+ * @attention
+ *
+ * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
+ * All rights reserved.</center></h2>
+ *
+ * This software component is licensed by ST under BSD 3-Clause license,
+ * the "License"; You may not use this file except in compliance with the
+ * License. You may obtain a copy of the License at:
+ *                        opensource.org/licenses/BSD-3-Clause
+ *
+ ******************************************************************************
+ */
 /* USER CODE END Header */
 
 /* Includes ------------------------------------------------------------------*/
@@ -32,7 +32,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
- 
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -57,18 +57,16 @@ volatile uint8_t Timer1, Timer2;
 
 void SDTimer_Handler(void)
 {
-  if(Timer1 > 0)
-    Timer1--;
+	if (Timer1 > 0) Timer1--;
 
-  if(Timer2 > 0)
-    Timer2--;
+	if (Timer2 > 0) Timer2--;
 }
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
 extern DMA_HandleTypeDef hdma_usart1_rx;
 extern DMA_HandleTypeDef hdma_usart2_rx;
-extern DMA_HandleTypeDef hdma_usart3_rx;
+extern DMA_HandleTypeDef hdma_usart2_tx;
 /* USER CODE BEGIN EV */
 
 /* USER CODE END EV */
@@ -95,11 +93,31 @@ void NMI_Handler(void)
 void HardFault_Handler(void)
 {
   /* USER CODE BEGIN HardFault_IRQn 0 */
+	HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(LED_GPIO_Port, ERROR_LED_Pin, GPIO_PIN_SET);
+	uint32_t hfsr = *((uint32_t*) 0xE000ED2C);
+	//Debug... Return back to the code
+	if (hfsr & (0b1 << 31))
+	{
+		HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(LED_GPIO_Port, ERROR_LED_Pin, GPIO_PIN_RESET);
+
+		return;
+	}
+	//Forced Hard Fault
+	if (hfsr & (0b1 << 30))
+	{
+		uint16_t mmfsr = *((uint16_t*) 0xE000ED28);
+		uint8_t bfsr = *((uint8_t*) 0xE000ED29);
+		uint16_t ufsr = *((uint16_t*) 0xE000ED2A);
+		__NOP();
+	}
 
   /* USER CODE END HardFault_IRQn 0 */
   while (1)
   {
     /* USER CODE BEGIN W1_HardFault_IRQn 0 */
+
     /* USER CODE END W1_HardFault_IRQn 0 */
   }
 }
@@ -110,11 +128,14 @@ void HardFault_Handler(void)
 void MemManage_Handler(void)
 {
   /* USER CODE BEGIN MemoryManagement_IRQn 0 */
+	HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(LED_GPIO_Port, ERROR_LED_Pin, GPIO_PIN_SET);
 
   /* USER CODE END MemoryManagement_IRQn 0 */
   while (1)
   {
     /* USER CODE BEGIN W1_MemoryManagement_IRQn 0 */
+
     /* USER CODE END W1_MemoryManagement_IRQn 0 */
   }
 }
@@ -125,11 +146,14 @@ void MemManage_Handler(void)
 void BusFault_Handler(void)
 {
   /* USER CODE BEGIN BusFault_IRQn 0 */
+	HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(LED_GPIO_Port, ERROR_LED_Pin, GPIO_PIN_SET);
 
   /* USER CODE END BusFault_IRQn 0 */
   while (1)
   {
     /* USER CODE BEGIN W1_BusFault_IRQn 0 */
+
     /* USER CODE END W1_BusFault_IRQn 0 */
   }
 }
@@ -140,11 +164,14 @@ void BusFault_Handler(void)
 void UsageFault_Handler(void)
 {
   /* USER CODE BEGIN UsageFault_IRQn 0 */
+	HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(LED_GPIO_Port, ERROR_LED_Pin, GPIO_PIN_SET);
 
   /* USER CODE END UsageFault_IRQn 0 */
   while (1)
   {
     /* USER CODE BEGIN W1_UsageFault_IRQn 0 */
+
     /* USER CODE END W1_UsageFault_IRQn 0 */
   }
 }
@@ -195,7 +222,7 @@ void SysTick_Handler(void)
 {
   /* USER CODE BEGIN SysTick_IRQn 0 */
 	FatFsCnt++;
-	if(FatFsCnt >= 10)
+	if (FatFsCnt >= 10)
 	{
 		FatFsCnt = 0;
 		SDTimer_Handler();
@@ -213,20 +240,6 @@ void SysTick_Handler(void)
 /* For the available peripheral interrupt handler names,                      */
 /* please refer to the startup file (startup_stm32f1xx.s).                    */
 /******************************************************************************/
-
-/**
-  * @brief This function handles DMA1 channel3 global interrupt.
-  */
-void DMA1_Channel3_IRQHandler(void)
-{
-  /* USER CODE BEGIN DMA1_Channel3_IRQn 0 */
-
-  /* USER CODE END DMA1_Channel3_IRQn 0 */
-  HAL_DMA_IRQHandler(&hdma_usart3_rx);
-  /* USER CODE BEGIN DMA1_Channel3_IRQn 1 */
-
-  /* USER CODE END DMA1_Channel3_IRQn 1 */
-}
 
 /**
   * @brief This function handles DMA1 channel5 global interrupt.
@@ -254,6 +267,20 @@ void DMA1_Channel6_IRQHandler(void)
   /* USER CODE BEGIN DMA1_Channel6_IRQn 1 */
 
   /* USER CODE END DMA1_Channel6_IRQn 1 */
+}
+
+/**
+  * @brief This function handles DMA1 channel7 global interrupt.
+  */
+void DMA1_Channel7_IRQHandler(void)
+{
+  /* USER CODE BEGIN DMA1_Channel7_IRQn 0 */
+
+  /* USER CODE END DMA1_Channel7_IRQn 0 */
+  HAL_DMA_IRQHandler(&hdma_usart2_tx);
+  /* USER CODE BEGIN DMA1_Channel7_IRQn 1 */
+
+  /* USER CODE END DMA1_Channel7_IRQn 1 */
 }
 
 /* USER CODE BEGIN 1 */

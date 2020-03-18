@@ -82,15 +82,20 @@ void SLICoreModule::UpdateLocalModules()
 	}
 }
 
+extern "C"
+{
+	void Lights(int count);
+}
 
 void SLICoreModule::AddModule(SLIModule* module)
 {
-	SLI_FASSERT(m_ContainedModules[module->GetIntID()] == nullptr, f << "Module already exists! " << GetModuleIDName(module->GetID()));
-	m_ContainedModules[module->GetIntID()] = module;
+	SLI_FASSERT(m_ContainedModules[module->GetID()] == nullptr, f << "Module already exists! " << GetModuleIDName(module->GetID()));
+	m_ContainedModules[module->GetID()] = module;
 	DefaultFormatter formatter;
-	formatter << "Added module! ID " << module->GetIntID();
-	Info(formatter);
+	formatter << "Added module: " << GetModuleIDName(module->GetID());
 	module->Init();
+	Info(formatter);
+
 }
 
 SLIModule* SLICoreModule::GetModule(ModuleIDType id)
@@ -128,7 +133,7 @@ Formatter BeginMessage(const char* device, LogLevelType level)
 
 void SLILogable::SendDebugMessage(Formatter&& formatter, LogLevelType level)
 {
-	SerialPrint(std::move(formatter), level);
+	SerialPrint(std::move(formatter), GetID(), level);
 }
 
 

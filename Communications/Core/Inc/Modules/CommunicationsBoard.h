@@ -17,7 +17,7 @@ public:
 
 	virtual void Init();
 	virtual void Update();
-	inline void SetSDCard(SDCard* sd) {m_SDCard = sd;}
+	inline void SetSDCard(SDCard* sd) { m_SDCard = sd; }
 
 public:
 	static CommunicationsBoard& GetInstance();

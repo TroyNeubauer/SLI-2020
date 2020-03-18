@@ -43,7 +43,7 @@ public:
 
 	const char* c_str();
 	inline operator const char*() { return c_str(); }
-	inline const char* Data() { return m_Buf; }
+	inline char* Data() { return m_Buf; }
 
 	inline std::size_t Capacity() const { return m_Capacity; }
 	inline std::size_t Size() const { return m_Offset; }
@@ -163,6 +163,7 @@ public:
 	inline const char* c_str() { return m_Wrapper.c_str(); }
 	inline operator const char*() { return c_str(); }
 	inline operator Formatter&() { return m_Wrapper; }
+	inline char* Data() { return m_Wrapper.Data(); }
 
 	inline std::size_t Capacity() const { return m_Wrapper.Capacity(); }
 	inline std::size_t Size() const { return m_Wrapper.Size(); }

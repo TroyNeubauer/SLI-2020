@@ -11,8 +11,11 @@ uint8_t gpsBuf[512];
 
 void GPS::Init()
 {
+	Error_Lights(2);
+	Lights(2);
 	Trace("GPS::Init");
-	NMEASend("PMTK251,115200");
+	Lights(3);
+/*	NMEASend("PMTK251,115200");
 	Trace("Sent GPS baud rate change command");
 	DelayUS(100);
 
@@ -25,9 +28,13 @@ void GPS::Init()
 		return;
 	}
 	Info("Changed GPS baud rate to 115200 b/s");
-	NMEASend("PMTK220,100");
-	NMEASend("PMTK314,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0");
-	UARTRead(m_gpsUART, &gpsBuf, sizeof(gpsBuf));
+	*/
+//	NMEASend("PMTK220,100");
+//	NMEASend("PMTK314,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0");
+	UARTRead(m_gpsUART, gpsBuf, sizeof(gpsBuf));
+	Lights(4);
+	Info("Started UART transfer");
+	Lights(5);
 }
 
 uint32_t lastPos = 0;
@@ -35,21 +42,15 @@ uint32_t lastPos = 0;
 void GPS::Update()
 {
 	uint32_t currentPos = m_gpsUART->RxXferSize - __HAL_DMA_GET_COUNTER(m_gpsUART->hdmarx);
+	DefaultFormatter f;
+	f << "GPS at pos " << currentPos;
+	Trace(f);
 	if (currentPos != lastPos)
 	{
 		if (gpsBuf[currentPos - 1] == '\n')
 		{
-			StackBuffer<sizeof(PacketHeader) + sizeof(DataPacket_GPS) + 5 * MAX_NMEA_LENGTH> buf;
-
-			PacketHeader* header = buf.Header();
-			header->ID = 0;
-			header->UnixSeconds = 420;
-			header->NanoSeconds = 69;
-
-			header->Destination = ModuleID::GROUND_STATION;
-			header->Forwarder = ModuleID::NONE;
-			header->From = ModuleID::GPS;
-			header->Type = PacketType::DATA;
+			StackBuffer<MAX_PACKET_SIZE> buf;
+			NewPacket(buf, PacketType::DATA);
 
 			DataPacket_GPS* messagePacket = buf.Ptr<DataPacket_GPS>();
 
@@ -57,6 +58,7 @@ void GPS::Update()
 			{
 				uint32_t length = currentPos - lastPos;
 				messagePacket->NMEASentenceLength = length;
+
 
 				char* destSentence = buf.As<char>(messagePacket->NMEASentenceLength);
 				memcpy(destSentence, gpsBuf + lastPos, messagePacket->NMEASentenceLength);
@@ -73,8 +75,6 @@ void GPS::Update()
 				memcpy(destSentence, gpsBuf + lastPos, endLength);
 				memcpy(destSentence + endLength, gpsBuf, beginLength);
 			}
-
-			header->CRC32 = buf.CalculateCRC32();
 
 			SendPacket(buf);
 			lastPos = currentPos;
